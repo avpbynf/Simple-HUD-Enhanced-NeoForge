@@ -59,9 +59,9 @@ public class GameInfo {
             return "";
         }
         String coordsFormat = "X: %.0f, Z: %.0f";
-        if (this.player.getWorld().getRegistryKey().getValue().toString().equals("minecraft:overworld")) {
+        if (this.player.getEntityWorld().getRegistryKey().getValue().toString().equals("minecraft:overworld")) {
             return (Utilities.translatable("text.hud.simplehudenhanced.nether").getString() + ": " + String.format(coordsFormat, this.player.getX() / 8, this.player.getZ() / 8));
-        } else if (this.player.getWorld().getRegistryKey().getValue().toString().equals("minecraft:the_nether")) {
+        } else if (this.player.getEntityWorld().getRegistryKey().getValue().toString().equals("minecraft:the_nether")) {
             return(Utilities.translatable("text.hud.simplehudenhanced.overworld").getString() + ": " + String.format(coordsFormat, this.player.getX() * 8, this.player.getZ() * 8));
         }
         return "";
@@ -163,7 +163,7 @@ public class GameInfo {
             return "";
         }
 
-        Vec3d playerPosVec = this.player.getPos();
+        Vec3d playerPosVec = this.player.getEntityPos();
         double travelledX = playerPosVec.x - this.player.lastX;
         double travelledZ = playerPosVec.z - this.player.lastZ;
         double currentSpeed = MathHelper.sqrt((float)(travelledX * travelledX + travelledZ * travelledZ));
@@ -180,7 +180,7 @@ public class GameInfo {
         if (!config.statusElements.toggleLightLevel) {
             return "";
         }
-        return String.format(Utilities.translatable("text.hud.simplehudenhanced.lightlevel").getString() + ": %d", this.player.getWorld().getLightLevel(this.player.getBlockPos()));
+        return String.format(Utilities.translatable("text.hud.simplehudenhanced.lightlevel").getString() + ": %d", this.player.getEntityWorld().getLightLevel(this.player.getBlockPos()));
     }
 
     public String getTime() {
@@ -188,7 +188,7 @@ public class GameInfo {
             return "";
         }
 
-        long time = this.player.getWorld().getTimeOfDay();
+        long time = this.player.getEntityWorld().getTimeOfDay();
 
         if (config.statusElements.gameTime.toggleGameTime24Hour) {
             //24-hour format
@@ -238,7 +238,7 @@ public class GameInfo {
         if (!config.statusElements.gameTime.toggleGameDayCounter) {
             return "";
         }
-        long time = this.player.getWorld().getTimeOfDay();
+        long time = this.player.getEntityWorld().getTimeOfDay();
         long day = (time / 24000);
         return String.format(Utilities.translatable("text.hud.simplehudenhanced.day").getString() + ": %d", day);
     }

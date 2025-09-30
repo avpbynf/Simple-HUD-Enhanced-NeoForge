@@ -43,7 +43,7 @@ public class SimpleHudEnhancedClient implements ClientModInitializer {
         KeyBinding toggleHudKey = new KeyBinding(
                 "key.simplehudenhanced.toggle_hud",
                 GLFW.GLFW_KEY_GRAVE_ACCENT, // ` key
-                "key.category.simplehudenhanced.hud"
+                KeyBinding.Category.create(Identifier.of("simplehudenhanced","hud"))
         );
 
         KeyBinding toggleHudKeybinding = KeyBindingHelper.registerKeyBinding(toggleHudKey);
