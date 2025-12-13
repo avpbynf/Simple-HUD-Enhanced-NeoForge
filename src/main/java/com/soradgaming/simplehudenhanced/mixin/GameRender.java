@@ -7,6 +7,7 @@ import com.soradgaming.simplehudenhanced.hud.StatusEffectBarRenderer;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -18,10 +19,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Environment(EnvType.CLIENT)
 @Mixin(value = InGameHud.class)
@@ -47,17 +44,19 @@ public class GameRender {
         // Start Mixin
         HUD.initialize(client, config);
 
-        // Start a new thread to update the equipment cache in the background
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(() -> {
-            // Update Equipment Cache
-            HUD hud = HUD.getInstance();
-            if (hud != null && MinecraftClient.getInstance().player != null) {
-                hud.getEquipmentCache().updateCache(MinecraftClient.getInstance().player);
-                hud.getMovementCache().updateCache(MinecraftClient.getInstance().player);
-                hud.getStatusCache().updateCache();
+        // Use a client tick event to safely update caches on the main game thread
+        ClientTickEvents.END_CLIENT_TICK.register(tickClient -> {
+            // This code now runs safely on the main client thread at the end of each tick
+            if (tickClient.player != null) {
+                HUD hud = HUD.getInstance();
+                if (hud != null) {
+                    // The update methods are now called in a thread-safe context
+                    hud.getEquipmentCache().updateCache(tickClient.player);
+                    hud.getMovementCache().updateCache(tickClient.player);
+                    hud.getStatusCache().updateCache();
+                }
             }
-        }, 0, 50, TimeUnit.MILLISECONDS); // 20 times a second TimeUnit.MILLISECONDS
+        });
     }
 
     // Injects into the renderStatusEffectOverlay method in the InGameHud class to render the status effect bars on the HUD

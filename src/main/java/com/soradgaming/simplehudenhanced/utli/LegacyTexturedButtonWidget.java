@@ -4,7 +4,6 @@ import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class LegacyTexturedButtonWidget extends TexturedButtonWidget {
@@ -29,7 +28,7 @@ public class LegacyTexturedButtonWidget extends TexturedButtonWidget {
             int textureWidth,
             int textureHeight,
             ButtonWidget.PressAction pressAction,
-            Text message
+            net.minecraft.text.Text message
     ) {
         super(x, y, width, height, null, pressAction, message);
 
@@ -44,7 +43,7 @@ public class LegacyTexturedButtonWidget extends TexturedButtonWidget {
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void drawIcon(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         int v = this.v;
         if (!this.isInteractable()) {
             v += this.hoveredVOffset * 2;
@@ -64,5 +63,77 @@ public class LegacyTexturedButtonWidget extends TexturedButtonWidget {
                 this.textureWidth,
                 this.textureHeight
         );
+    }
+
+    public static Builder legacyTexturedBuilder(net.minecraft.text.Text message, ButtonWidget.PressAction onPress) {
+        return new Builder(message, onPress);
+    }
+
+    public static class Builder {
+        private final net.minecraft.text.Text message;
+        private final ButtonWidget.PressAction onPress;
+
+        private int x;
+        private int y;
+
+        private int width;
+        private int height;
+
+        private int u;
+        private int v;
+        private int hoveredVOffset;
+
+        private Identifier texture;
+
+        private int textureWidth;
+        private int textureHeight;
+
+        public Builder(net.minecraft.text.Text message, PressAction onPress) {
+            this.message = message;
+            this.onPress = onPress;
+        }
+
+        public Builder position(int x, int y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        }
+
+        public Builder size(int width, int height) {
+            this.width = width;
+            this.height = height;
+            return this;
+        }
+
+        public Builder uv(int u, int v, int hoveredVOffset) {
+            this.u = u;
+            this.v = v;
+            this.hoveredVOffset = hoveredVOffset;
+            return this;
+        }
+
+        public Builder texture(Identifier texture, int textureWidth, int textureHeight) {
+            this.texture = texture;
+            this.textureWidth = textureWidth;
+            this.textureHeight = textureHeight;
+            return this;
+        }
+
+        public LegacyTexturedButtonWidget build() {
+            return new LegacyTexturedButtonWidget(
+                    this.x,
+                    this.y,
+                    this.width,
+                    this.height,
+                    this.u,
+                    this.v,
+                    this.hoveredVOffset,
+                    this.texture,
+                    this.textureWidth,
+                    this.textureHeight,
+                    this.onPress,
+                    this.message
+            );
+        }
     }
 }

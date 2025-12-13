@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static me.shedaniel.autoconfig.AutoConfigClient.getConfigScreen;
+
 @Mixin(GameMenuScreen.class)
 public class ConfigButton {
     @Inject(method = "initWidgets", at = @At("TAIL"))
@@ -38,7 +40,7 @@ public class ConfigButton {
                 Identifier.of("simplehudenhanced", "textures/mods_button.png"),
                 32,
                 64,
-                button -> MinecraftClient.getInstance().setScreen(AutoConfig.getConfigScreen(SimpleHudEnhancedConfig.class, screen).get()),
+                button -> MinecraftClient.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, screen).get()),
                 ScreenTexts.EMPTY
         ));
     }

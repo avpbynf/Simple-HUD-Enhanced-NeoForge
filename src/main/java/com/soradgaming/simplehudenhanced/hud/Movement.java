@@ -6,13 +6,16 @@ import com.soradgaming.simplehudenhanced.utli.Utilities;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.entity.EntityRenderManager;
+import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import static com.soradgaming.simplehudenhanced.utli.Utilities.addAlpha;
-import static net.minecraft.client.gui.screen.ingame.InventoryScreen.drawEntity;
 
 public class Movement {
     private final MinecraftClient client;
@@ -97,6 +100,9 @@ public class Movement {
         Quaternionf quaternionX = new Quaternionf().rotateX(15.0F * 0.017453292F);
         quaternionZ.mul(quaternionX);
 
+        // Scale Fix
+        EntityRenderState entityRenderState = drawEntity(entity);
+
         // --- Save Entity's Original Rotation State ---
         // This is crucial so the paper doll rendering doesn't affect the main player model.
         float originalPitch = entity.getPitch();
@@ -107,12 +113,15 @@ public class Movement {
         float originalPrevHeadYaw = entity.lastHeadYaw;
 
         // --- Modify Entity's Rotation for Paper Doll Display ---
-        applyEntityRotations(entity);
+        if (entityRenderState instanceof LivingEntityRenderState livingEntityRenderState) {
+            applyEntityRotations(livingEntityRenderState);
+        }
 
         // --- Calculate Entity Position and Scale ---
         float yOffset = (entity.getHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * 0.5F;
         Vector3f vector3f = new Vector3f(0.0F, yOffset, 0.0F);
-        drawEntity(context, x1, y1, x2, y2, size, vector3f, quaternionZ, quaternionX, entity);
+        context.addEntity(entityRenderState, size, vector3f, quaternionZ, quaternionX, x1, y1, x2, y2);
+
 
         // --- Restore Entity's Original Rotation State ---
         entity.setPitch(originalPitch);
@@ -124,14 +133,22 @@ public class Movement {
         context.disableScissor();
     }
 
-    private void applyEntityRotations(LivingEntity entity) {
+    private static EntityRenderState drawEntity(LivingEntity entity) {
+        EntityRenderManager entityRenderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
+        EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderManager.getRenderer(entity);
+        EntityRenderState entityRenderState = entityRenderer.getAndUpdateRenderState(entity, 1.0F);
+        entityRenderState.light = 15728880;
+        entityRenderState.shadowPieces.clear();
+        entityRenderState.outlineColor = 0;
+        return entityRenderState;
+    }
+
+    private void applyEntityRotations(LivingEntityRenderState entity) {
         // TODO Config
         if (this.config.paperDoll.paperDollLocationY >= 50) {
-            entity.setPitch(-7.5F);
-            entity.lastPitch = -7.5F;
+            entity.pitch = -7.5F;
         } else {
-            entity.setPitch(7.5F);
-            entity.lastPitch = 7.5F;
+            entity.pitch = 7.5F;
         }
 
         float defaultRotationYaw = 180.0F;
@@ -142,10 +159,10 @@ public class Movement {
         }
 
         float yRotOffset = 0;
-        float yRotOffsetO = 0;
 
-        entity.bodyYaw = entity.lastBodyYaw = defaultRotationYaw;
-        entity.lastHeadYaw = defaultRotationYaw + yRotOffsetO;
-        entity.headYaw = defaultRotationYaw + yRotOffset;
+        entity.bodyYaw = defaultRotationYaw;
+        entity.relativeHeadYaw = yRotOffset;
+
+
     }
 }
