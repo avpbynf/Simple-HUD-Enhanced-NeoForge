@@ -3,7 +3,7 @@ package com.soradgaming.simplehudenhanced.hud;
 import com.soradgaming.simplehudenhanced.cache.MovementCache;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.entity.EntityRenderManager;
@@ -12,20 +12,21 @@ import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import static com.soradgaming.simplehudenhanced.utli.Utilities.addAlpha;
 
 public class Movement {
-    private final MinecraftClient client;
+    private final Minecraft client;
     private final TextRenderer renderer;
     private final SimpleHudEnhancedConfig config;
     private final DrawContext context;
     private final MovementCache movementCache;
 
     public Movement(DrawContext context, SimpleHudEnhancedConfig config, MovementCache movementCache) {
-        this.client = MinecraftClient.getInstance();
+        this.client = Minecraft.getInstance();
         this.renderer = client.textRenderer;
         this.config = config;
         this.context = context;
@@ -69,13 +70,13 @@ public class Movement {
         }
 
         // Get Player Entity
-        PlayerEntity entity = this.client.player;
+        Player entity = this.client.player;
         if (entity == null) {
             return;
         }
 
         // Config
-        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         float scale = (float) config.paperDoll.textScale / 100;
         float size = 20 * scale;
 
@@ -93,7 +94,7 @@ public class Movement {
     }
 
     // Custom method for rendering the paper doll. FROM InventoryScreen.java
-    private void drawEntityInternal(DrawContext context, int x1, int y1, int x2, int y2, float size, LivingEntity entity) {
+    private void drawEntityInternal(DrawContext context, int x1, int y1, int x2, int y2, float size, Player entity) {
         // --- Calculate Scissor Area ---
         context.enableScissor(x1, y1, x2, y2);
         Quaternionf quaternionZ = new Quaternionf().rotateZ(180.0F * 0.017453292F);
@@ -133,9 +134,9 @@ public class Movement {
         context.disableScissor();
     }
 
-    private static EntityRenderState drawEntity(LivingEntity entity) {
-        EntityRenderManager entityRenderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
-        EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderManager.getRenderer(entity);
+    private static EntityRenderState drawEntity(Player entity) {
+        EntityRenderManager entityRenderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+        EntityRenderer<? super Player, ?> entityRenderer = entityRenderManager.getRenderer(entity);
         EntityRenderState entityRenderState = entityRenderer.getAndUpdateRenderState(entity, 1.0F);
         entityRenderState.light = 15728880;
         entityRenderState.shadowPieces.clear();

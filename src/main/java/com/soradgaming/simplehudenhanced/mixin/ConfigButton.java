@@ -4,10 +4,9 @@ import com.soradgaming.simplehudenhanced.SimpleHudEnhanced;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.LegacyTexturedButtonWidget;
 import me.shedaniel.autoconfig.AutoConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.screen.ScreenTexts;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static me.shedaniel.autoconfig.AutoConfigClient.getConfigScreen;
 
-@Mixin(GameMenuScreen.class)
+@Mixin(MenuScreens.class)
 public class ConfigButton {
     @Inject(method = "initWidgets", at = @At("TAIL"))
     private void addCustomButton(CallbackInfo ci) {
@@ -40,7 +39,7 @@ public class ConfigButton {
                 Identifier.of("simplehudenhanced", "textures/mods_button.png"),
                 32,
                 64,
-                button -> MinecraftClient.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, screen).get()),
+                button -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, screen).get()),
                 ScreenTexts.EMPTY
         ));
     }

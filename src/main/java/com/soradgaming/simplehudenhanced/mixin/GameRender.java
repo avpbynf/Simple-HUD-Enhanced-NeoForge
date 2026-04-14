@@ -8,7 +8,7 @@ import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
@@ -26,7 +26,7 @@ public class GameRender {
     @Unique
     private SimpleHudEnhancedConfig config;
     @Inject(method = "<init>(Lnet/minecraft/client/MinecraftClient;)V", at = @At(value = "RETURN"))
-    private void onInit(MinecraftClient client, CallbackInfo ci) {
+    private void onInit(Minecraft client, CallbackInfo ci) {
         // Get Config
         this.config = AutoConfig.getConfigHolder(SimpleHudEnhancedConfig.class).getConfig();
         // Register Save Listener

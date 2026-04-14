@@ -3,18 +3,18 @@ package com.soradgaming.simplehudenhanced.hud;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.TpsTracker;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.player.Player;
 
 public class GameInfo {
-    private final MinecraftClient client;
-    private ClientPlayerEntity player;
+    private final Minecraft client;
+    private Player player;
     private final SimpleHudEnhancedConfig config;
 
-    public GameInfo(MinecraftClient client, SimpleHudEnhancedConfig config) {
+    public GameInfo(Minecraft client, SimpleHudEnhancedConfig config) {
         this.client = client;
         this.config = config;
 
@@ -30,7 +30,7 @@ public class GameInfo {
         if (!config.statusElements.coordinates.toggleCoordinates) {
             return "";
         }
-        return String.format("%d, %d, %d", this.player.getBlockPos().getX(), this.player.getBlockPos().getY(), this.player.getBlockPos().getZ());
+        return String.format("%d, %d, %d", this.player.blockPosition().getX(), this.player.blockPosition().getY(), this.player.blockPosition().getZ());
     }
 
     public String getBiome() {
@@ -38,9 +38,9 @@ public class GameInfo {
             return "";
         }
 
-        if (this.client.world == null) {return "";}
+        if (this.client.level == null) {return "";}
 
-        return Utilities.getBiome(this.client.world, this.player, config.statusElements.Biome.toggleBiomeLabel);
+        return Utilities.getBiome(this.client.level, this.player, config.statusElements.Biome.toggleBiomeLabel);
     }
 
     public String getDirection() {
@@ -59,7 +59,7 @@ public class GameInfo {
             return "";
         }
         String coordsFormat = "X: %.0f, Z: %.0f";
-        if (this.player.getEntityWorld().getRegistryKey().getValue().toString().equals("minecraft:overworld")) {
+        if (this.player.level().getRegistryKey().getValue().toString().equals("minecraft:overworld")) {
             return (Utilities.translatable("text.hud.simplehudenhanced.nether").getString() + ": " + String.format(coordsFormat, this.player.getX() / 8, this.player.getZ() / 8));
         } else if (this.player.getEntityWorld().getRegistryKey().getValue().toString().equals("minecraft:the_nether")) {
             return(Utilities.translatable("text.hud.simplehudenhanced.overworld").getString() + ": " + String.format(coordsFormat, this.player.getX() * 8, this.player.getZ() * 8));
@@ -122,12 +122,12 @@ public class GameInfo {
             return "";
         }
 
-        if (this.client.world == null) {
+        if (this.client.level == null) {
             return "";
         }
 
         if (config.statusElements.counters.chunkCount.toggleTotal && config.statusElements.counters.chunkCount.toggleLoaded) {
-            return String.format("C: %s", this.client.world.getChunkManager().getDebugString());
+            return String.format("C: %s", this.client.level.getChunkManager().getDebugString());
         } else {
             if (config.statusElements.counters.chunkCount.toggleLoaded) {
                 return String.format("C: %s", this.client.world.getChunkManager().getLoadedChunkCount());
@@ -144,8 +144,8 @@ public class GameInfo {
         if (!config.statusElements.counters.toggleEntityCount) {
             return "";
         }
-        if (this.client.world != null) {
-            return String.format("E: %d", this.client.world.getRegularEntityCount());
+        if (this.client.level != null) {
+            return String.format("E: %d", this.client.level.getEntityCount());
         }
         return "";
     }
@@ -297,7 +297,7 @@ public class GameInfo {
 
     public boolean isPlayerFlying() {
         // Done this way to ensure null safety
-        return this.player.isGliding();
+        return this.player.isFallFlying();
     }
 
     public boolean isPlayerSwimming() {
@@ -307,6 +307,6 @@ public class GameInfo {
 
     public boolean isPlayerSneaking() {
         // Done this way to ensure null safety
-        return this.player.isSneaking();
+        return this.player.isCrouching();
     }
 }

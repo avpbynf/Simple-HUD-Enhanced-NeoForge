@@ -1,11 +1,9 @@
 package com.soradgaming.simplehudenhanced.utli;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -34,8 +32,8 @@ public class Utilities {
     }
 
     // Get Players Biome
-    public static String getBiome(ClientWorld world, ClientPlayerEntity player, boolean toggleBiomeLabel) {
-        Optional<RegistryKey<Biome>> biome = world.getBiome(player.getBlockPos()).getKey();
+    public static String getBiome(@Nullable ClientLevel world, Player player, boolean toggleBiomeLabel) {
+        Optional<RegistryKey<net.minecraft.world.level.biome.Biome>> biome = world.getBiome(player.getBlockPos()).getKey();
 
         if (biome.isPresent()) {
             String biomeName = Text.translatable("biome." + biome.get().getValue().getNamespace() + "." + biome.get().getValue().getPath()).getString();
@@ -50,7 +48,7 @@ public class Utilities {
     }
 
     //Get Player FPS
-    public static String getFPS(MinecraftClient client) {
-        return String.format("%d fps", client.getCurrentFps());
+    public static String getFPS(Minecraft client) {
+        return String.format("%d fps", client.getFps());
     }
 }

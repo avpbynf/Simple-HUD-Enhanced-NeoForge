@@ -7,7 +7,7 @@ import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.config.TextAlignment;
 import com.soradgaming.simplehudenhanced.utli.Colours;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 
@@ -21,7 +21,7 @@ public class HUD {
     private static HUD instance;  // Singleton instance
 
     // Minecraft client variables
-    private final MinecraftClient client;
+    private final Minecraft client;
     private final TextRenderer renderer;
 
     //Config
@@ -36,14 +36,14 @@ public class HUD {
     public boolean sprintTimerRunning = false;  // Variable to store if the timer is running
     public long sprintTimer = 3000;  // X seconds in milliseconds (default 3 seconds)
 
-    private HUD(MinecraftClient client, SimpleHudEnhancedConfig config) {
+    private HUD(Minecraft client, SimpleHudEnhancedConfig config) {
         this.client = client;
         this.renderer = client.textRenderer;
         this.config = config;
     }
 
     // Initialization method (called once)
-    public static void initialize(MinecraftClient client, SimpleHudEnhancedConfig config) {
+    public static void initialize(Minecraft client, SimpleHudEnhancedConfig config) {
         if (instance == null) {
             Logger.getLogger(Utilities.getModName()).warning("New HUD instance created.");
         } else {
@@ -72,7 +72,7 @@ public class HUD {
     public TextRenderer getRenderer() {
         if (renderer == null) {
             Logger.getLogger(Utilities.getModName()).warning("TextRenderer is null. Returning default renderer.");
-            return MinecraftClient.getInstance().textRenderer;
+            return Minecraft.getInstance().textRenderer;
         }
         return renderer;
     }

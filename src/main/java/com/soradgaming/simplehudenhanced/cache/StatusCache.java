@@ -2,7 +2,7 @@ package com.soradgaming.simplehudenhanced.cache;
 
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.hud.GameInfo;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 
@@ -29,7 +29,7 @@ public class StatusCache {
     }
 
     public void updateCache() {
-        GameInfo gameInfo = new GameInfo(MinecraftClient.getInstance(), config);
+        GameInfo gameInfo = new GameInfo(Minecraft.getInstance(), config);
         calculateHudInfo(gameInfo);
         calculateSystemTime(gameInfo);
     }
