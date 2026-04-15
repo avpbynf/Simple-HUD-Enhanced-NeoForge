@@ -3,11 +3,14 @@ package com.soradgaming.simplehudenhanced.utli;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utilities {
     public static String getModName() {
@@ -35,18 +38,36 @@ public class Utilities {
 
     // Get Players Biome
     public static String getBiome(@Nullable ClientLevel world, Player player, boolean toggleBiomeLabel) {
-        Optional<RegistryKey<Biome>> biome = world.getBiome(player.blockPosition()).getKey();
+        if (world == null) {
+            return "";
+        }
+
+        Optional<ResourceKey<Biome>> biome = world.getBiome(player.blockPosition()).unwrapKey();
 
         if (biome.isPresent()) {
-            String biomeName = Component.translatable("biome." + biome.get().getValue().getNamespace() + "." + biome.get().getValue().getPath()).getString();
+            String biomeName = Component.translatable(getBiomeTranslationKey(biome.get())).getString();
             if (toggleBiomeLabel) {
                 return String.format(Component.translatable("text.hud.simplehudenhanced.biome").getString() + ": %s", Utilities.capitalise(biomeName));
             } else {
-                return String.format("%s " + Component.translatable("text.hud.simplehudenhanced.biome").getString() , Utilities.capitalise(biomeName));
+                return String.format("%s " + Component.translatable("text.hud.simplehudenhanced.biome").getString(), Utilities.capitalise(biomeName));
             }
         }
 
         return "";
+    }
+
+    private static String getBiomeTranslationKey(ResourceKey<Biome> biomeKey) {
+        String raw = biomeKey.toString();
+        Matcher matcher = Pattern.compile("([a-z0-9_.-]+):([a-z0-9_/.-]+)").matcher(raw);
+
+        String namespace = "minecraft";
+        String path = "plains";
+        while (matcher.find()) {
+            namespace = matcher.group(1);
+            path = matcher.group(2);
+        }
+
+        return "biome." + namespace + "." + path;
     }
 
     //Get Player FPS

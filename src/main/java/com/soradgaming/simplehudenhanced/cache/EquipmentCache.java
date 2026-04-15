@@ -6,6 +6,7 @@ import com.soradgaming.simplehudenhanced.hud.EquipmentInfoStack;
 import com.soradgaming.simplehudenhanced.hud.ScreenManager;
 import com.soradgaming.simplehudenhanced.utli.TrinketAccessor;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -135,12 +136,13 @@ public class EquipmentCache {
 
             } else {
                 // Draw Count - Update to Check if player is holding 1 or more of the item (including inventory)
-                if (config.equipmentStatus.showCount && this.player.getInventory().count(item.getItem()) > 1) {
+                int totalCount = this.player.getInventory().countItem(item.getItem());
+                if (config.equipmentStatus.showCount && totalCount > 1) {
                     // Check if player is holding all the item
-                    if (this.player.getInventory().count(item.getItem()) == item.getCount()) {
+                    if (totalCount == item.getCount()) {
                         index.setText(String.valueOf(item.getCount()));
                     } else {
-                        index.setText((item.getCount() + " (" + this.player.getInventory().count(item.getItem()) + ")"));
+                        index.setText(item.getCount() + " (" + totalCount + ")");
                     }
                 } else {
                     index.setText("");
@@ -189,7 +191,7 @@ public class EquipmentCache {
             String s = index.getText();
             if (s.length() > longestString) {
                 longestString = s.length();
-                BoxWidth = Minecraft.getInstance().textRenderer.getWidth(s);
+                BoxWidth = Minecraft.getInstance().font.width(s);
             }
         }
         this.longestString = BoxWidth;
@@ -214,7 +216,7 @@ public class EquipmentCache {
         screenManagerDeadlock = true;
 
         Minecraft client = Minecraft.getInstance();
-        TextRenderer renderer = client.textRenderer;
+        Font renderer = client.font;
 
         // Screen Size Calculations
         int configX = config.equipmentStatus.equipmentStatusLocationX;
@@ -230,7 +232,7 @@ public class EquipmentCache {
         if (config.equipmentStatus.equipmentOrientation == EquipmentOrientation.Horizontal) {
             int total = 0;
             for (EquipmentInfoStack index : equipmentInfo) {
-                int lineLength = renderer.getWidth(index.getText());
+                int lineLength = renderer.width(index.getText());
                 total += lineLength;
             }
             xAxis = screenManager.calculateXAxis(configX, Scale, total + (24 * equipmentInfo.size()) - 4);

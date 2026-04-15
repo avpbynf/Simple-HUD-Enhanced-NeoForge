@@ -45,14 +45,14 @@ public class ScreenManager {
     }
 
     public void setScale(GuiGraphicsExtractor context, float scale) {
-        // Change Matrix Stack to draw on the screen
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale);
+        // Change pose stack to draw scaled HUD content.
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
     }
 
     public void resetScale(GuiGraphicsExtractor context) {
-        // Change Matrix Stack back to normal
-        context.getMatrices().popMatrix();
+        // Restore pose stack so following draws are unscaled.
+        context.pose().popMatrix();
     }
 
     // xAxis & yAxis Setters and Getters
@@ -84,4 +84,3 @@ public class ScreenManager {
         this.sScale = scale;
     }
 }
-

@@ -1,11 +1,11 @@
 package com.soradgaming.simplehudenhanced.utli;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 public class LegacyTexturedButtonWidget extends ImageButton {
     private final int u;
@@ -44,7 +44,7 @@ public class LegacyTexturedButtonWidget extends ImageButton {
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
+    public void extractContents(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         int v = this.v;
         if (!this.isActive()) {
             v += this.hoveredVOffset * 2;
@@ -66,12 +66,12 @@ public class LegacyTexturedButtonWidget extends ImageButton {
         );
     }
 
-    public static com.terraformersmc.modmenu.gui.widget.LegacyTexturedButtonWidget.Builder legacyTexturedBuilder(net.minecraft.network.chat.Component message, Button.OnPress onPress) {
-        return new com.terraformersmc.modmenu.gui.widget.LegacyTexturedButtonWidget.Builder(message, onPress);
+    public static Builder legacyTexturedBuilder(Component message, Button.OnPress onPress) {
+        return new Builder(message, onPress);
     }
 
     public static class Builder {
-        private final net.minecraft.network.chat.Component message;
+        private final Component message;
         private final Button.OnPress onPress;
 
         private int x;
@@ -89,31 +89,31 @@ public class LegacyTexturedButtonWidget extends ImageButton {
         private int textureWidth;
         private int textureHeight;
 
-        public Builder(net.minecraft.network.chat.Component message, OnPress onPress) {
+        public Builder(Component message, OnPress onPress) {
             this.message = message;
             this.onPress = onPress;
         }
 
-        public com.terraformersmc.modmenu.gui.widget.LegacyTexturedButtonWidget.Builder position(int x, int y) {
+        public Builder position(int x, int y) {
             this.x = x;
             this.y = y;
             return this;
         }
 
-        public com.terraformersmc.modmenu.gui.widget.LegacyTexturedButtonWidget.Builder size(int width, int height) {
+        public Builder size(int width, int height) {
             this.width = width;
             this.height = height;
             return this;
         }
 
-        public com.terraformersmc.modmenu.gui.widget.LegacyTexturedButtonWidget.Builder uv(int u, int v, int hoveredVOffset) {
+        public Builder uv(int u, int v, int hoveredVOffset) {
             this.u = u;
             this.v = v;
             this.hoveredVOffset = hoveredVOffset;
             return this;
         }
 
-        public com.terraformersmc.modmenu.gui.widget.LegacyTexturedButtonWidget.Builder texture(Identifier texture, int textureWidth, int textureHeight) {
+        public Builder texture(Identifier texture, int textureWidth, int textureHeight) {
             this.texture = texture;
             this.textureWidth = textureWidth;
             this.textureHeight = textureHeight;
