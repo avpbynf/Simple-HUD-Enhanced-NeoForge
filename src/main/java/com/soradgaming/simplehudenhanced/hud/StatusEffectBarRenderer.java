@@ -2,13 +2,13 @@ package com.soradgaming.simplehudenhanced.hud;
 
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.StatusEffectsTracker;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class StatusEffectBarRenderer {
     private static SimpleHudEnhancedConfig config;
-    public static void render(DrawContext drawContext, StatusEffectInstance effect, int x, int y, int width, int height, SimpleHudEnhancedConfig config) {
+    public static void render(GuiGraphicsExtractor drawContext, StatusEffectInstance effect, int x, int y, int width, int height, SimpleHudEnhancedConfig config) {
         if (!config.toggleEffectsStatus) return;
 
         StatusEffectBarRenderer.config = config;
@@ -35,9 +35,9 @@ public class StatusEffectBarRenderer {
         }
     }
 
-    private static void drawVerticalBar(int x, int y, int startX, int startY, int endY, float progress, DrawContext drawContext, StatusEffectInstance effect) {
+    private static void drawVerticalBar(int x, int y, int startX, int startY, int endY, float progress, GuiGraphicsExtractor drawContext, StatusEffectInstance effect) {
         int middleX = startX + 1;
-        int middleY = MathHelper.lerp(progress, startY, endY);
+        int middleY = Mth.lerp(progress, startY, endY);
         int endX = startX;
 
         startX += x;
@@ -51,10 +51,10 @@ public class StatusEffectBarRenderer {
         drawContext.fill(middleX, middleY, endX, endY, config.effectsStatus.backgroundColor);
     }
 
-    private static void drawHorizontalBar(int x, int y, int startX, int endX, int startY,float progress, DrawContext drawContext, StatusEffectInstance effect) {
+    private static void drawHorizontalBar(int x, int y, int startX, int endX, int startY,float progress, GuiGraphicsExtractor drawContext, StatusEffectInstance effect) {
         int middleY = startY + 1;
         int endY = startY;
-        int middleX = MathHelper.lerp(progress, startX, endX);
+        int middleX = Mth.lerp(progress, startX, endX);
 
         startX += x;
         middleX += x;

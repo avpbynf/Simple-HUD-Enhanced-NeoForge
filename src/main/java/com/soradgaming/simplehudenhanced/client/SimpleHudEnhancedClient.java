@@ -8,11 +8,11 @@ import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class SimpleHudEnhancedClient implements ClientModInitializer {
@@ -27,24 +27,22 @@ public class SimpleHudEnhancedClient implements ClientModInitializer {
         this.registerKeybindings();
 
         // Register a HUD element to render the custom HUD
-        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE ,Identifier.of("simplehudenhanced", "hud"), (context, tickCounter) -> {
+        HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE , Identifier.fromNamespaceAndPath("simplehudenhanced", "hud"), (graphics, tickCounter) -> {
             if (this.hud == null) {
                 this.hud = HUD.getInstance();
                 // Render the HUD on next tick
             } else {
-                this.hud.drawHud(context);
+                this.hud.drawHud(graphics);
             }
         });
     }
 
     void registerKeybindings() {
-        KeyBinding toggleHudKey = new KeyBinding(
+        KeyMapping toggleHudKeybinding = new KeyMapping(
                 "key.simplehudenhanced.toggle_hud",
                 GLFW.GLFW_KEY_GRAVE_ACCENT, // ` key
-                KeyBinding.Category.create(Identifier.of("simplehudenhanced", "hud"))
+                KeyMapping.Category.register(Identifier.parse("key.category.simplehudenhanced"))
         );
-
-        KeyBinding toggleHudKeybinding = KeyBindingHelper.registerKeyBinding(toggleHudKey);
 
         // Initialize previousDebugHudState
         boolean[] previousDebugHudState = new boolean[]{false};
@@ -53,7 +51,7 @@ public class SimpleHudEnhancedClient implements ClientModInitializer {
             if (client.player == null) return;
 
             // Detect changes in shouldShowDebugHud state
-            boolean currentDebugHudState = MinecraftClient.getInstance().getDebugHud().shouldShowDebugHud();
+            boolean currentDebugHudState = Minecraft.getInstance().getDebugOverlay().showDebugScreen();
             SimpleHudEnhancedConfig config = this.configHolder.getConfig();
 
             if (currentDebugHudState != previousDebugHudState[0]) {
@@ -68,13 +66,13 @@ public class SimpleHudEnhancedClient implements ClientModInitializer {
             // Update the previous state for the next tick
             previousDebugHudState[0] = currentDebugHudState;
 
-            if (toggleHudKeybinding.wasPressed()) {
+            if (toggleHudKeybinding.consumeClick()) {
                 String chatMessage = "key.simplehudenhanced.toggle_hud.chat_message.on";
                 if (config.uiConfig.toggleSimpleHUDEnhanced) {
                     chatMessage = "key.simplehudenhanced.toggle_hud.chat_message.off";
                 }
 
-                client.player.sendMessage(Utilities.translatable(chatMessage), true);
+                client.player.sendOverlayMessage(Utilities.translatable(chatMessage));
                 config.uiConfig.toggleSimpleHUDEnhanced = !config.uiConfig.toggleSimpleHUDEnhanced;
                 AutoConfig.getConfigHolder(SimpleHudEnhancedConfig.class).save();
             }

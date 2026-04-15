@@ -3,11 +3,10 @@ package com.soradgaming.simplehudenhanced.mixin;
 import com.soradgaming.simplehudenhanced.SimpleHudEnhanced;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.LegacyTexturedButtonWidget;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,7 +35,7 @@ public class ConfigButton {
                 0,
                 0,
                 20,
-                Identifier.of("simplehudenhanced", "textures/mods_button.png"),
+                Identifier.fromNamespaceAndPath("simplehudenhanced", "textures/mods_button.png"),
                 32,
                 64,
                 button -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, screen).get()),

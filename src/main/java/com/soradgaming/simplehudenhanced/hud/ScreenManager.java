@@ -1,6 +1,6 @@
 package com.soradgaming.simplehudenhanced.hud;
 
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class ScreenManager {
     private final int screenWidth;
@@ -44,13 +44,13 @@ public class ScreenManager {
         }
     }
 
-    public void setScale(DrawContext context, float scale) {
+    public void setScale(GuiGraphicsExtractor context, float scale) {
         // Change Matrix Stack to draw on the screen
         context.getMatrices().pushMatrix();
         context.getMatrices().scale(scale);
     }
 
-    public void resetScale(DrawContext context) {
+    public void resetScale(GuiGraphicsExtractor context) {
         // Change Matrix Stack back to normal
         context.getMatrices().popMatrix();
     }

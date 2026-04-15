@@ -1,7 +1,6 @@
 package com.soradgaming.simplehudenhanced.utli;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.registry.entry.RegistryEntry;
 

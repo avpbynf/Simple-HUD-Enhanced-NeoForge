@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public class LegacyTexturedButtonWidget extends ImageButton {
@@ -28,7 +29,7 @@ public class LegacyTexturedButtonWidget extends ImageButton {
             int textureWidth,
             int textureHeight,
             Button.OnPress pressAction,
-            net.minecraft.network.chat.Component message
+            Component message
     ) {
         super(x, y, width, height, null, pressAction, message);
 
@@ -43,7 +44,7 @@ public class LegacyTexturedButtonWidget extends ImageButton {
     }
 
     @Override
-    public void extractContents(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float deltaTicks) {
         int v = this.v;
         if (!this.isActive()) {
             v += this.hoveredVOffset * 2;
@@ -51,7 +52,7 @@ public class LegacyTexturedButtonWidget extends ImageButton {
             v += this.hoveredVOffset;
         }
 
-        context.blit(
+        graphics.blit(
                 RenderPipelines.GUI_TEXTURED,
                 this.texture,
                 this.getX(),

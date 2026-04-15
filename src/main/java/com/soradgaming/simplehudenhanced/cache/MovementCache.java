@@ -1,6 +1,6 @@
 package com.soradgaming.simplehudenhanced.cache;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 
@@ -41,13 +41,13 @@ public class MovementCache {
         float height = player.getEyeHeight(Pose.STANDING);
         if (player.isFallFlying()) {
             float ticksElytraFlying = (float) (player.fallDistance + 1.0);
-            float flyingAnimation = MathHelper.clamp(ticksElytraFlying * 0.09F, 0.0F, 1.0F);
+            float flyingAnimation = Mth.clamp(ticksElytraFlying * 0.09F, 0.0F, 1.0F);
             float flyingHeight = player.getEyeHeight(Pose.FALL_FLYING) / height;
-            currentHeightOffset = Math.lerp(flyingAnimation, 1.0F, flyingHeight);
+            currentHeightOffset = Mth.lerp(flyingAnimation, 1.0F, flyingHeight);
         } else if (player.isSwimming()) {
             float swimmingAnimation = player.isVisuallySwimming() ? 1.0F : player.swingTime;
             float swimmingHeight = player.getEyeHeight(Pose.SWIMMING) / height;
-            currentHeightOffset = MathHelper.lerp(swimmingAnimation, 1.0F, swimmingHeight);
+            currentHeightOffset = Mth.lerp(swimmingAnimation, 1.0F, swimmingHeight);
         } else if (player.isAutoSpinAttack()) {
             currentHeightOffset = player.getEyeHeight(Pose.SPIN_ATTACK) / height;
         } else if (player.isCrouching()) {
@@ -56,9 +56,9 @@ public class MovementCache {
             currentHeightOffset = player.getEyeHeight(Pose.SLEEPING) / height;
         } else if (player.deathTime > 0) {
             float dyingAnimation = ((float) player.deathTime + (float) 1.0 - 1.0F) / 20.0F * 1.6F;
-            dyingAnimation = Math.min(1.0F, MathHelper.sqrt(dyingAnimation));
+            dyingAnimation = Math.min(1.0F, Mth.sqrt(dyingAnimation));
             float dyingHeight = player.getEyeHeight(Pose.DYING) / height;
-            currentHeightOffset = MathHelper.lerp(dyingAnimation, 1.0F, dyingHeight);
+            currentHeightOffset = Mth.lerp(dyingAnimation, 1.0F, dyingHeight);
         } else {
             currentHeightOffset = 1.0F;
         }

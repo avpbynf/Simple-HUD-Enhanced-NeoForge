@@ -4,9 +4,7 @@ import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.TpsTracker;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 public class GameInfo {
@@ -166,11 +164,11 @@ public class GameInfo {
         Vec3d playerPosVec = this.player.getEntityPos();
         double travelledX = playerPosVec.x - this.player.lastX;
         double travelledZ = playerPosVec.z - this.player.lastZ;
-        double currentSpeed = MathHelper.sqrt((float)(travelledX * travelledX + travelledZ * travelledZ));
+        double currentSpeed = Mth.sqrt((float)(travelledX * travelledX + travelledZ * travelledZ));
 
         if (config.statusElements.playerSpeed.togglePlayerVerticalSpeed) {
             double currentVertSpeed = playerPosVec.y - this.player.lastY;
-            currentSpeed = MathHelper.sqrt((float)(currentSpeed * currentSpeed + currentVertSpeed * currentVertSpeed));
+            currentSpeed = Mth.sqrt((float)(currentSpeed * currentSpeed + currentVertSpeed * currentVertSpeed));
         }
 
         return String.format("%.2f m/s", currentSpeed / 0.05F);

@@ -2,7 +2,9 @@ package com.soradgaming.simplehudenhanced.utli;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -27,20 +29,20 @@ public class Utilities {
      **********************************************************/
 
     // Text Management
-    public static Text translatable(String key) {
-        return Text.translatable(key);
+    public static Component translatable(String key) {
+        return Component.translatable(key);
     }
 
     // Get Players Biome
     public static String getBiome(@Nullable ClientLevel world, Player player, boolean toggleBiomeLabel) {
-        Optional<RegistryKey<net.minecraft.world.level.biome.Biome>> biome = world.getBiome(player.getBlockPos()).getKey();
+        Optional<RegistryKey<Biome>> biome = world.getBiome(player.blockPosition()).getKey();
 
         if (biome.isPresent()) {
-            String biomeName = Text.translatable("biome." + biome.get().getValue().getNamespace() + "." + biome.get().getValue().getPath()).getString();
+            String biomeName = Component.translatable("biome." + biome.get().getValue().getNamespace() + "." + biome.get().getValue().getPath()).getString();
             if (toggleBiomeLabel) {
-                return String.format(Text.translatable("text.hud.simplehudenhanced.biome").getString() + ": %s", Utilities.capitalise(biomeName));
+                return String.format(Component.translatable("text.hud.simplehudenhanced.biome").getString() + ": %s", Utilities.capitalise(biomeName));
             } else {
-                return String.format("%s " + Text.translatable("text.hud.simplehudenhanced.biome").getString() , Utilities.capitalise(biomeName));
+                return String.format("%s " + Component.translatable("text.hud.simplehudenhanced.biome").getString() , Utilities.capitalise(biomeName));
             }
         }
 
