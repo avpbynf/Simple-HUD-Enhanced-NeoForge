@@ -3,6 +3,7 @@ package com.soradgaming.simplehudenhanced.mixin;
 import com.soradgaming.simplehudenhanced.SimpleHudEnhanced;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.LegacyTexturedButtonWidget;
+import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -20,7 +21,7 @@ import java.lang.reflect.Method;
 
 import static me.shedaniel.autoconfig.AutoConfigClient.getConfigScreen;
 
-@Mixin(Minecraft.class)
+@Mixin(KeyboardHandler.class)
 public class ConfigButton {
     @Unique
     private Screen simpleHudEnhanced$lastScreen;
@@ -28,7 +29,7 @@ public class ConfigButton {
     @Unique
     private boolean simpleHudEnhanced$buttonAddedForScreen;
 
-    @Inject(method = "handleInputEvents", at = @At("TAIL"))
+    @Inject(method = "keyPress(JILnet/minecraft/client/input/KeyEvent;)V", at = @At("TAIL"))
     private void addCustomButton(CallbackInfo ci) {
         if (SimpleHudEnhanced.isModMenuInstalled()) {
             return;

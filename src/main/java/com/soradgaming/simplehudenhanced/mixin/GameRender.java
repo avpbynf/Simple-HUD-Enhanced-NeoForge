@@ -43,7 +43,7 @@ public class GameRender {
         this.simpleHudEnhancedInitialized = true;
     }
 
-    @Inject(method = "runTick", at = @At("TAIL"))
+    @Inject(method = "tick()V", at = @At("TAIL"))
     private void onClientTick(CallbackInfo ci) {
         initializeIfNeeded();
 
