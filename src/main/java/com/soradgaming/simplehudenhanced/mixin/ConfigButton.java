@@ -2,88 +2,67 @@ package com.soradgaming.simplehudenhanced.mixin;
 
 import com.soradgaming.simplehudenhanced.SimpleHudEnhanced;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
-import com.soradgaming.simplehudenhanced.utli.LegacyTexturedButtonWidget;
-import net.minecraft.client.KeyboardHandler;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.lang.reflect.Method;
+import java.util.List;
 
 import static me.shedaniel.autoconfig.AutoConfigClient.getConfigScreen;
 
-@Mixin(KeyboardHandler.class)
-public class ConfigButton {
-    @Unique
-    private Screen simpleHudEnhanced$lastScreen;
+@Mixin(PauseScreen.class)
+public class ConfigButton extends Screen {
+    protected ConfigButton(Component title) {
+        super(title);
+    }
 
-    @Unique
-    private boolean simpleHudEnhanced$buttonAddedForScreen;
-
-    @Inject(method = "keyPress(JILnet/minecraft/client/input/KeyEvent;)V", at = @At("TAIL"))
-    private void addCustomButton(CallbackInfo ci) {
+    @Inject(method = "createPauseMenu", at = @At("TAIL"))
+    private void onCreatePauseMenu(CallbackInfo ci) {
         if (SimpleHudEnhanced.isModMenuInstalled()) {
             return;
         }
 
-        Minecraft client = Minecraft.getInstance();
-        Screen screen = client.screen;
-        if (!(screen instanceof TitleScreen)) {
-            return;
-        }
+        List<AbstractWidget> buttons = Screens.getWidgets(this);
+        AbstractWidget anchor = simpleHudEnhanced$findPauseAnchor(buttons);
 
-        if (screen != this.simpleHudEnhanced$lastScreen) {
-            this.simpleHudEnhanced$lastScreen = screen;
-            this.simpleHudEnhanced$buttonAddedForScreen = false;
-        }
+        int buttonX = anchor != null ? anchor.getX() + anchor.getWidth() + 2 : this.width / 2 + 4 + 100 + 2;
+        int buttonY = anchor != null ? anchor.getY() : this.height / 4 + 72 - 16 + 1;
 
-        if (this.simpleHudEnhanced$buttonAddedForScreen) {
-            return;
-        }
-
-        LegacyTexturedButtonWidget button = new LegacyTexturedButtonWidget(
-                screen.width / 2 + 4 + 100 + 2,
-                screen.height / 4 + 72 - 16,
-                20,
-                20,
-                0,
-                0,
-                20,
-                Identifier.fromNamespaceAndPath("simplehudenhanced", "textures/mods_button.png"),
-                32,
-                64,
-                ignored -> client.setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, screen).get()),
-                Component.empty()
+        // Use the same pause menu pass as vanilla and place this right of report/share.
+        this.addRenderableWidget(
+                Button.builder(
+                                Component.literal("C"), // TODO Texture
+                                ignored -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, this).get())
+                        )
+                        .bounds(buttonX, buttonY, 20, 20)
+                        .build()
         );
-
-        this.simpleHudEnhanced$buttonAddedForScreen = simpleHudEnhanced$tryAddWidget(screen, button);
     }
 
     @Unique
-    private static boolean simpleHudEnhanced$tryAddWidget(Screen screen, AbstractWidget widget) {
-        return simpleHudEnhanced$tryInvoke(screen, "addRenderableWidget", AbstractWidget.class, widget)
-                || simpleHudEnhanced$tryInvoke(screen, "addWidget", GuiEventListener.class, widget)
-                || simpleHudEnhanced$tryInvoke(screen, "addDrawableChild", AbstractWidget.class, widget);
-    }
-
-    @Unique
-    private static boolean simpleHudEnhanced$tryInvoke(Screen screen, String methodName, Class<?> parameterType, Object arg) {
-        try {
-            Method method = Screen.class.getDeclaredMethod(methodName, parameterType);
-            method.setAccessible(true);
-            method.invoke(screen, arg);
-            return true;
-        } catch (ReflectiveOperationException ignored) {
-            return false;
+    private static AbstractWidget simpleHudEnhanced$findPauseAnchor(List<AbstractWidget> buttons) {
+        for (AbstractWidget widget : buttons) {
+            if (simpleHudEnhanced$hasTranslationKey(widget.getMessage(), "menu.playerReporting")
+                    || simpleHudEnhanced$hasTranslationKey(widget.getMessage(), "menu.shareToLan")) {
+                return widget;
+            }
         }
+        return null;
+    }
+
+    @Unique
+    private static boolean simpleHudEnhanced$hasTranslationKey(Component component, String key) {
+        return component.getContents() instanceof TranslatableContents translatable
+                && key.equals(translatable.getKey());
     }
 }

@@ -9,8 +9,7 @@
   "client": [
     "ConfigButton",
     "GameRender",
-    "MovementMixin",
-    "ScreenInvoker"
+    "MovementMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -128,7 +128,7 @@ public class GameInfo {
             return "";
         }
 
-        String stats = this.client.level.gatherChunkSourceStats();
+        String stats = String.valueOf(this.client.level.getChunkSource().getLoadedChunksCount()); // TODO Test
         String[] parts = stats.split(",");
         String loaded = parts.length > 0 ? parts[0].trim() : stats;
         String total = parts.length > 1 ? parts[1].trim() : stats;
