@@ -258,7 +258,7 @@ public class GameInfo {
         if (!config.statusElements.gameTime.toggleGameDayCounter || this.player == null) {
             return "";
         }
-        long time = this.player.level().getLevelData().getGameTime();
+        long time = this.player.level().getOverworldClockTime();
         long day = (time / 24000);
         return String.format(Utilities.translatable("text.hud.simplehudenhanced.day").getString() + ": %d", day);
     }
