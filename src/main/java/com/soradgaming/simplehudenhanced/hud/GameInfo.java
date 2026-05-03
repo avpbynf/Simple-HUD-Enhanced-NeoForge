@@ -4,7 +4,6 @@ import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -127,10 +126,10 @@ public class GameInfo {
         if (this.client.level == null) {
             return "";
         }
-
-        String stats = String.valueOf(this.client.level.getChunkSource().getLoadedChunksCount()); // TODO Test
+         // Update stats before getting count
+        String stats = this.player.level().getChunkSource().gatherStats(); // TODO - Test Total
         String[] parts = stats.split(",");
-        String loaded = parts.length > 0 ? parts[0].trim() : stats;
+        int loaded = this.player.level().getChunkSource().getLoadedChunksCount();
         String total = parts.length > 1 ? parts[1].trim() : stats;
 
         if (config.statusElements.counters.chunkCount.toggleTotal && config.statusElements.counters.chunkCount.toggleLoaded) {
@@ -170,25 +169,31 @@ public class GameInfo {
             return "";
         }
 
-//        Vec3 movement = this.player.getDeltaMovement();
-//        this.player.getSpeed();
-//        double currentSpeed = Mth.sqrt((float) (movement.x * movement.x + movement.z * movement.z));
-//
-//        if (config.statusElements.playerSpeed.togglePlayerVerticalSpeed) {
-//            currentSpeed = movement.length();
-//        }
+        // Use actual position deltas (displacement) between ticks instead of motion vector.
+        // This reflects true displacement (accounts for collisions, friction, etc.).
+        double dx = this.player.getX() - this.player.xOld;
+        double dz = this.player.getZ() - this.player.zOld;
+        double dy = this.player.getY() - this.player.yOld;
 
-        Vec3 playerPosVec = this.player.getDeltaMovement();
-        double travelledX = playerPosVec.x - this.player.xOld;
-        double travelledZ = playerPosVec.z - this.player.zOld;
-        double currentSpeed = Math.sqrt((float)(travelledX * travelledX + travelledZ * travelledZ));
+        // displacement per tick -> convert to meters per second by dividing by tick time (0.05s)
+        double xzSpeedPerTick = Math.sqrt(dx * dx + dz * dz);
+        double xzSpeedMps = xzSpeedPerTick / 0.05D;
+
+        double currentSpeedMps = xzSpeedMps;
 
         if (config.statusElements.playerSpeed.togglePlayerVerticalSpeed) {
-            double currentVertSpeed = playerPosVec.y - this.player.yOld;
-            currentSpeed = Math.sqrt((float)(currentSpeed * currentSpeed + currentVertSpeed * currentVertSpeed));
+            double ySpeedPerTick = Math.abs(dy);
+            double ySpeedMps = ySpeedPerTick / 0.05D;
+
+            // deadzone to ignore tiny vertical jitter while standing
+            if (ySpeedMps < 0.1D) {
+                ySpeedMps = 0.0D;
+            }
+
+            currentSpeedMps = Math.sqrt(xzSpeedMps * xzSpeedMps + ySpeedMps * ySpeedMps);
         }
 
-        return String.format("%.2f m/s", currentSpeed / 0.05F);
+        return String.format("%.2f m/s", currentSpeedMps);
     }
 
     public String getLightLevel() {
@@ -253,7 +258,7 @@ public class GameInfo {
         if (!config.statusElements.gameTime.toggleGameDayCounter || this.player == null) {
             return "";
         }
-        long time = this.player.level().getGameTime();
+        long time = this.player.level().getLevelData().getGameTime();
         long day = (time / 24000);
         return String.format(Utilities.translatable("text.hud.simplehudenhanced.day").getString() + ": %d", day);
     }
