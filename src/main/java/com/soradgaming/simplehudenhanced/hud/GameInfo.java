@@ -170,11 +170,22 @@ public class GameInfo {
             return "";
         }
 
-        Vec3 movement = this.player.getDeltaMovement();
-        double currentSpeed = Mth.sqrt((float) (movement.x * movement.x + movement.z * movement.z));
+//        Vec3 movement = this.player.getDeltaMovement();
+//        this.player.getSpeed();
+//        double currentSpeed = Mth.sqrt((float) (movement.x * movement.x + movement.z * movement.z));
+//
+//        if (config.statusElements.playerSpeed.togglePlayerVerticalSpeed) {
+//            currentSpeed = movement.length();
+//        }
+
+        Vec3 playerPosVec = this.player.getDeltaMovement();
+        double travelledX = playerPosVec.x - this.player.xOld;
+        double travelledZ = playerPosVec.z - this.player.zOld;
+        double currentSpeed = Math.sqrt((float)(travelledX * travelledX + travelledZ * travelledZ));
 
         if (config.statusElements.playerSpeed.togglePlayerVerticalSpeed) {
-            currentSpeed = movement.length();
+            double currentVertSpeed = playerPosVec.y - this.player.yOld;
+            currentSpeed = Math.sqrt((float)(currentSpeed * currentSpeed + currentVertSpeed * currentVertSpeed));
         }
 
         return String.format("%.2f m/s", currentSpeed / 0.05F);

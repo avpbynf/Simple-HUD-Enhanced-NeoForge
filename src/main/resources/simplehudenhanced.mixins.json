@@ -9,6 +9,7 @@
   "client": [
     "ConfigButton",
     "GameRender",
+    "GuiMixin",
     "MovementMixin"
   ],
   "injectors": {
