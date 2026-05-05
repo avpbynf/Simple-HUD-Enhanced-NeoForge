@@ -2,14 +2,15 @@ package com.soradgaming.simplehudenhanced.mixin;
 
 import com.soradgaming.simplehudenhanced.SimpleHudEnhanced;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
+import com.soradgaming.simplehudenhanced.gui.TexturedButton;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,13 +41,17 @@ public class ConfigButton extends Screen {
 
         // Use the same pause menu pass as vanilla and place this right of report/share.
         this.addRenderableWidget(
-                Button.builder(
-                                Component.literal("C"), // TODO Texture
-                                ignored -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, this).get())
-                        )
-                        .bounds(buttonX, buttonY, 20, 20)
-                        .build()
+                new TexturedButton(
+                        buttonX,
+                        buttonY,
+                        20,
+                        20,
+                        Identifier.fromNamespaceAndPath("simplehudenhanced", "textures/mods_button.png"),
+                        _ -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, this).get()),
+                        Component.literal("Config")
+                )
         );
+
     }
 
     @Unique
