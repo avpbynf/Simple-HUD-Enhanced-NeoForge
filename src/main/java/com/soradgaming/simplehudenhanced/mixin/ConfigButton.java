@@ -2,7 +2,7 @@ package com.soradgaming.simplehudenhanced.mixin;
 
 import com.soradgaming.simplehudenhanced.SimpleHudEnhanced;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
-import com.soradgaming.simplehudenhanced.gui.TexturedButton;
+import com.soradgaming.simplehudenhanced.utli.LegacyTexturedButtonWidget;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -41,17 +41,21 @@ public class ConfigButton extends Screen {
 
         // Use the same pause menu pass as vanilla and place this right of report/share.
         this.addRenderableWidget(
-                new TexturedButton(
+                new LegacyTexturedButtonWidget(
                         buttonX,
                         buttonY,
                         20,
                         20,
+                        0,
+                        0,
+                        20,
                         Identifier.fromNamespaceAndPath("simplehudenhanced", "textures/mods_button.png"),
+                        32,
+                        64,
                         _ -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, this).get()),
-                        Component.literal("Config")
+                        Component.literal("Simple Hud Enhanced Config")
                 )
         );
-
     }
 
     @Unique
