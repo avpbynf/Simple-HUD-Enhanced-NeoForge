@@ -80,7 +80,7 @@ public class Equipment {
                 return;
             }
 
-            int i = item.getBarWidth(); // TODO Test
+            int i = item.getBarWidth();
             int j = item.getBarColor();
             int k = xAxis + 2;
             int l = yAxis + 13;

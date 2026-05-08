@@ -208,7 +208,7 @@ public class GameInfo {
             return "";
         }
 
-        long time = this.player.level().getGameTime();
+        long time = this.player.level().getOverworldClockTime();
 
         if (config.statusElements.gameTime.toggleGameTime24Hour) {
             //24-hour format

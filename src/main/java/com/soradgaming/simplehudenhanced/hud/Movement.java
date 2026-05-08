@@ -6,8 +6,15 @@ import com.soradgaming.simplehudenhanced.utli.Utilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class Movement {
     private final Minecraft client;
@@ -84,13 +91,33 @@ public class Movement {
     }
 
     // 26.1: use vanilla inventory renderer instead of removed EntityRenderState pipeline.
-    private void drawEntityInternal(GuiGraphicsExtractor context, int x1, int y1, int x2, int y2, float size, Player entity) {
-        context.enableScissor(x1, y1, x2, y2);
+    private void drawEntityInternal(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, float size, Player entity) {
+        Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
+        Quaternionf xRotation = new Quaternionf().rotateX(20.0F * (float) (Math.PI / 180.0));
+        rotation.mul(xRotation);
 
-        // Reuse cached height offset for subtle vertical bobbing in the helper call.
-        float verticalOffset = (1.0F - this.movementCache.getCurrentHeightOffset()) * 10.0F;
-        InventoryScreen.extractEntityInInventoryFollowsMouse(context, x1, y1, x2, y2, Math.round(size), 0.0F, 0.0F, verticalOffset, entity);
+        EntityRenderState renderState = extractRenderState(entity);
+        if (renderState instanceof LivingEntityRenderState livingRenderState) {
+            livingRenderState.bodyRot = 180.0F + (this.config.paperDoll.paperDollLocationX >= 50 ? 20.0F : -20.0F);
+            livingRenderState.yRot = 0.0F;
+            livingRenderState.xRot = this.config.paperDoll.paperDollLocationY >= 50 ? -7.5F : 7.5f;
+            // this.config.paperDoll.paperDollLocationY >= 50 ? -7.5F : 7.5f;
 
-        context.disableScissor();
+            livingRenderState.scale = size / 20.0F;
+        }
+        // entity.getheight() is what>?  renderState.boundingBoxHeight
+
+        float verticalOffset = (entity.getEyeHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * 0.5F;
+        Vector3f translation = new Vector3f(0.0F, verticalOffset, 0.0F);
+        graphics.entity(renderState, size, translation, rotation, xRotation, x1, y1, x2, y2);
+    }
+
+    private static EntityRenderState extractRenderState(final LivingEntity entity) {
+        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        EntityRenderer<? super LivingEntity, ?> renderer = entityRenderDispatcher.getRenderer(entity);
+        EntityRenderState renderState = renderer.createRenderState(entity, 1.0F);
+        renderState.shadowPieces.clear();
+        renderState.outlineColor = 0;
+        return renderState;
     }
 }
