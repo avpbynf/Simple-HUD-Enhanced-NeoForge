@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -75,7 +74,6 @@ public class Movement {
         // Config
         ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         float scale = (float) config.paperDoll.textScale / 100;
-        float size = 20 * scale;
 
         screenManager.setPadding((int) (26 * scale));
         int xAxis = screenManager.calculateXAxis(this.config.paperDoll.paperDollLocationX, 1, 0);
@@ -87,11 +85,11 @@ public class Movement {
         int y1 = Math.round((yAxis - (60 * scale)));
         int x2 = Math.round((xAxis + (60 * scale)));
         int y2 = Math.round((yAxis + (60 * scale)));
-        drawEntityInternal(context, x1, y1, x2, y2, size, client.player);
+        drawEntityInternal(context, x1, y1, x2, y2, scale, client.player);
     }
 
     // 26.1: use vanilla inventory renderer instead of removed EntityRenderState pipeline.
-    private void drawEntityInternal(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, float size, Player entity) {
+    private void drawEntityInternal(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, float scale, Player entity) {
         Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI);
         Quaternionf xRotation = new Quaternionf().rotateX(20.0F * (float) (Math.PI / 180.0));
         rotation.mul(xRotation);
@@ -101,15 +99,14 @@ public class Movement {
             livingRenderState.bodyRot = 180.0F + (this.config.paperDoll.paperDollLocationX >= 50 ? 20.0F : -20.0F);
             livingRenderState.yRot = 0.0F;
             livingRenderState.xRot = this.config.paperDoll.paperDollLocationY >= 50 ? -7.5F : 7.5f;
-            // this.config.paperDoll.paperDollLocationY >= 50 ? -7.5F : 7.5f;
-
-            livingRenderState.scale = size / 20.0F;
+            livingRenderState.scale = scale;
+            livingRenderState.boundingBoxWidth = livingRenderState.boundingBoxWidth / livingRenderState.scale;
+            livingRenderState.boundingBoxHeight = livingRenderState.boundingBoxHeight / livingRenderState.scale;
         }
-        // entity.getheight() is what>?  renderState.boundingBoxHeight
 
         float verticalOffset = (entity.getEyeHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * 0.5F;
         Vector3f translation = new Vector3f(0.0F, verticalOffset, 0.0F);
-        graphics.entity(renderState, size, translation, rotation, xRotation, x1, y1, x2, y2);
+        graphics.entity(renderState, 20.0F * scale, translation, rotation, xRotation, x1, y1, x2, y2);
     }
 
     private static EntityRenderState extractRenderState(final LivingEntity entity) {

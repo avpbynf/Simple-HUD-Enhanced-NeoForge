@@ -15,7 +15,7 @@ public class MovementMixin {
     @Unique
     private long sprintTimerStart = 0L;  // Variable to store the timer start time
 
-    @Inject(method = "keyPress(JILnet/minecraft/client/input/KeyEvent;)V", at = @At("TAIL"))
+    @Inject(method = "keyPress(JILnet/minecraft/client/input/KeyEvent;)V", at = @At("HEAD"))
     private void onHandleInputEvents(CallbackInfo info) {
         Player player = Minecraft.getInstance().player;
 
