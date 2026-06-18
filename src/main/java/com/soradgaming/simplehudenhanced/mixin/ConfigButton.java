@@ -52,7 +52,7 @@ public class ConfigButton extends Screen {
                         Identifier.fromNamespaceAndPath("simplehudenhanced", "textures/mods_button.png"),
                         32,
                         64,
-                        _ -> Minecraft.getInstance().setScreen(getConfigScreen(SimpleHudEnhancedConfig.class, this).get()),
+                        _ -> Minecraft.getInstance().setScreenAndShow(getConfigScreen(SimpleHudEnhancedConfig.class, this).get()),
                         Component.literal("Simple Hud Enhanced Config")
                 )
         );

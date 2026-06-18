@@ -3,6 +3,7 @@ package com.soradgaming.simplehudenhanced.config;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 
 import java.util.function.ToIntBiFunction;
@@ -100,7 +101,10 @@ public class SimpleHudEnhancedConfig implements ConfigData {
                 }
             }
         } else if (colorMode == ColorModeSelector.Category) {
-            return convert.applyAsInt(effect.getEffect().value().getCategory().getTooltipFormatting().getColor(), 0xff000000);
+            if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+                return convert.applyAsInt(0xff5555, 0xff000000);
+            }
+            return convert.applyAsInt(0x5555ff, 0xff000000);
         }
         // If mode == ColorModeSelector.EFFECT_COLOR or mode == null (default)
         return convert.applyAsInt(effect.getEffect().value().getColor(), 0xff000000);
