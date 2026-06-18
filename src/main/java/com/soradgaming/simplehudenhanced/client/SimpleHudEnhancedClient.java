@@ -1,5 +1,6 @@
 package com.soradgaming.simplehudenhanced.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.hud.HUD;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
@@ -8,6 +9,7 @@ import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.KeyMapping;
@@ -38,11 +40,12 @@ public class SimpleHudEnhancedClient implements ClientModInitializer {
     }
 
     void registerKeybindings() {
-        KeyMapping toggleHudKeybinding = new KeyMapping(
+        KeyMapping toggleHudKeybinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.simplehudenhanced.toggle_hud",
-                GLFW.GLFW_KEY_GRAVE_ACCENT, // ` key
-                KeyMapping.Category.register(Identifier.parse("key.category.simplehudenhanced"))
-        );
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_GRAVE_ACCENT,
+                KeyMapping.Category.register(Identifier.fromNamespaceAndPath("simplehudenhanced","hud"))
+        ));
 
         // Initialize previousDebugHudState
         boolean[] previousDebugHudState = new boolean[]{false};

@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -105,6 +104,7 @@ public class Movement {
             livingRenderState.boundingBoxHeight = livingRenderState.boundingBoxHeight / livingRenderState.scale;
         }
 
+        // TODO: Fix Scaling at TOP
         float verticalOffset = ((entity.getEyeHeight() / 2.0F) + (1.0F - movementCache.getCurrentHeightOffset()) * scale);
         Vector3f translation = new Vector3f(0.0F, verticalOffset, 0.0F);
         graphics.entity(renderState, 20.0F * scale, translation, rotation, xRotation, x1, y1, x2, y2);
