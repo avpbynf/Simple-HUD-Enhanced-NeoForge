@@ -1,11 +1,11 @@
 package com.soradgaming.simplehudenhanced.utli;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.biome.Biome;
 
 import java.util.Optional;
 
@@ -25,20 +25,20 @@ public class Utilities {
      **********************************************************/
 
     // Text Management
-    public static Text translatable(String key) {
-        return Text.translatable(key);
+    public static Component translatable(String key) {
+        return Component.translatable(key);
     }
 
     // Get Players Biome
-    public static String getBiome(ClientWorld world, ClientPlayerEntity player, boolean toggleBiomeLabel) {
-        Optional<RegistryKey<Biome>> biome = world.getBiome(player.getBlockPos()).getKey();
+    public static String getBiome(ClientLevel world, Player player, boolean toggleBiomeLabel) {
+        Optional<ResourceKey<Biome>> biome = world.getBiome(player.blockPosition()).unwrapKey();
 
         if (biome.isPresent()) {
-            String biomeName = Text.translatable("biome." + biome.get().getValue().getNamespace() + "." + biome.get().getValue().getPath()).getString();
+            String biomeName = Component.translatable("biome." + biome.get().location().getNamespace() + "." + biome.get().location().getPath()).getString();
             if (toggleBiomeLabel) {
-                return String.format(Text.translatable("text.hud.simplehudenhanced.biome").getString() + ": %s", Utilities.capitalise(biomeName));
+                return String.format(Component.translatable("text.hud.simplehudenhanced.biome").getString() + ": %s", Utilities.capitalise(biomeName));
             } else {
-                return String.format("%s " + Text.translatable("text.hud.simplehudenhanced.biome").getString() , Utilities.capitalise(biomeName));
+                return String.format("%s " + Component.translatable("text.hud.simplehudenhanced.biome").getString(), Utilities.capitalise(biomeName));
             }
         }
 
@@ -46,7 +46,7 @@ public class Utilities {
     }
 
     //Get Player FPS
-    public static String getFPS(MinecraftClient client) {
-        return String.format("%d fps", client.getCurrentFps());
+    public static String getFPS(Minecraft client) {
+        return String.format("%d fps", client.getFps());
     }
 }

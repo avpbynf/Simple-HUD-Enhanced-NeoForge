@@ -1,6 +1,6 @@
 package com.soradgaming.simplehudenhanced.hud;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class EquipmentInfoStack {
     private final ItemStack item;

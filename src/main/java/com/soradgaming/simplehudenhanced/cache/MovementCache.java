@@ -1,9 +1,8 @@
 package com.soradgaming.simplehudenhanced.cache;
 
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
 
 public class MovementCache {
     private static MovementCache instance; // Singleton instance
@@ -22,7 +21,7 @@ public class MovementCache {
         return instance;
     }
 
-    public void updateCache(ClientPlayerEntity player) {
+    public void updateCache(Player player) {
         calculateCurrentHeightOffset(player);
     }
 
@@ -34,32 +33,32 @@ public class MovementCache {
         }
     }
 
-    private void calculateCurrentHeightOffset(LivingEntity player) {
+    private void calculateCurrentHeightOffset(Player player) {
         currentHeightOffsetOLD = currentHeightOffset;
         currentHeightOffsetDeadlock = true;
 
         // Crouching check after Elytra since you can do both at the same time
-        float height = player.getEyeHeight(EntityPose.STANDING);
+        float height = player.getEyeHeight(Pose.STANDING);
         if (player.isFallFlying()) {
-            float ticksElytraFlying = player.fallDistance + (float) 1.0;
-            float flyingAnimation = MathHelper.clamp(ticksElytraFlying * 0.09F, 0.0F, 1.0F);
-            float flyingHeight = player.getEyeHeight(EntityPose.FALL_FLYING) / height;
-            currentHeightOffset = MathHelper.lerp(flyingAnimation, 1.0F, flyingHeight);
+            float ticksElytraFlying = (float) (player.fallDistance + 1.0);
+            float flyingAnimation = Mth.clamp(ticksElytraFlying * 0.09F, 0.0F, 1.0F);
+            float flyingHeight = player.getEyeHeight(Pose.FALL_FLYING) / height;
+            currentHeightOffset = Mth.lerp(flyingAnimation, 1.0F, flyingHeight);
         } else if (player.isSwimming()) {
-            float swimmingAnimation = player.isInSwimmingPose() ? 1.0F : player.handSwingProgress;
-            float swimmingHeight = player.getEyeHeight(EntityPose.SWIMMING) / height;
-            currentHeightOffset = MathHelper.lerp(swimmingAnimation, 1.0F, swimmingHeight);
-        } else if (player.isUsingRiptide()) {
-            currentHeightOffset = player.getEyeHeight(EntityPose.SPIN_ATTACK) / height;
-        } else if (player.isSneaking()) {
-            currentHeightOffset = player.getEyeHeight(EntityPose.CROUCHING) / height;
+            float swimmingAnimation = player.isVisuallySwimming() ? 1.0F : player.swingTime;
+            float swimmingHeight = player.getEyeHeight(Pose.SWIMMING) / height;
+            currentHeightOffset = Mth.lerp(swimmingAnimation, 1.0F, swimmingHeight);
+        } else if (player.isAutoSpinAttack()) {
+            currentHeightOffset = player.getEyeHeight(Pose.SPIN_ATTACK) / height;
+        } else if (player.isCrouching()) {
+            currentHeightOffset = player.getEyeHeight(Pose.CROUCHING) / height;
         } else if (player.isSleeping()) {
-            currentHeightOffset = player.getEyeHeight(EntityPose.SLEEPING) / height;
+            currentHeightOffset = player.getEyeHeight(Pose.SLEEPING) / height;
         } else if (player.deathTime > 0) {
             float dyingAnimation = ((float) player.deathTime + (float) 1.0 - 1.0F) / 20.0F * 1.6F;
-            dyingAnimation = Math.min(1.0F, MathHelper.sqrt(dyingAnimation));
-            float dyingHeight = player.getEyeHeight(EntityPose.DYING) / height;
-            currentHeightOffset = MathHelper.lerp(dyingAnimation, 1.0F, dyingHeight);
+            dyingAnimation = Math.min(1.0F, Mth.sqrt(dyingAnimation));
+            float dyingHeight = player.getEyeHeight(Pose.DYING) / height;
+            currentHeightOffset = Mth.lerp(dyingAnimation, 1.0F, dyingHeight);
         } else {
             currentHeightOffset = 1.0F;
         }

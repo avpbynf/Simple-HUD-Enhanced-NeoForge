@@ -7,9 +7,9 @@ import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.config.TextAlignment;
 import com.soradgaming.simplehudenhanced.utli.Colours;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -19,8 +19,8 @@ public class HUD {
     private static HUD instance;  // Singleton instance
 
     // Minecraft client variables
-    private final MinecraftClient client;
-    private final TextRenderer renderer;
+    private final Minecraft client;
+    private final Font renderer;
 
     //Config
     private final SimpleHudEnhancedConfig config;
@@ -34,14 +34,14 @@ public class HUD {
     public boolean sprintTimerRunning = false;  // Variable to store if the timer is running
     public long sprintTimer = 3000;  // X seconds in milliseconds (default 3 seconds)
 
-    private HUD(MinecraftClient client, SimpleHudEnhancedConfig config) {
+    private HUD(Minecraft client, SimpleHudEnhancedConfig config) {
         this.client = client;
-        this.renderer = client.textRenderer;
+        this.renderer = client.font;
         this.config = config;
     }
 
     // Initialization method (called once)
-    public static void initialize(MinecraftClient client, SimpleHudEnhancedConfig config) {
+    public static void initialize(Minecraft client, SimpleHudEnhancedConfig config) {
         if (instance == null) {
             Logger.getLogger(Utilities.getModName()).warning("New HUD instance created.");
         } else {
@@ -66,7 +66,7 @@ public class HUD {
         return instance;
     }
 
-    public void drawHud(DrawContext context) {
+    public void drawHud(GuiGraphics context) {
         // Check if HUD is enabled
         if (!config.uiConfig.toggleSimpleHUDEnhanced) return;
 
@@ -95,9 +95,6 @@ public class HUD {
 
         // Draw Time
         drawTime(context, statusCache.getSystemTime());
-
-        // Ensure the Hud is drawn (thx rk_01)
-        context.draw();
     }
 
     public int getColor(String line, GameInfo GameInformation) {
@@ -126,7 +123,7 @@ public class HUD {
         return colour;
     }
 
-    private void drawStatusElements(DrawContext context, GameInfo gameInformation) {
+    private void drawStatusElements(GuiGraphics context, GameInfo gameInformation) {
         // Get all the lines to be displayed
         ArrayList<String> hudInfo = getStatusCache().getHudInfo();
 
@@ -141,14 +138,14 @@ public class HUD {
         for (String s : hudInfo) {
             if (s.length() > longestString) {
                 longestString = s.length();
-                BoxWidth = this.renderer.getWidth(s);
+                BoxWidth = this.renderer.width(s);
             }
         }
 
-        int lineHeight = (this.renderer.fontHeight); // TODO - Make this configurable
+        int lineHeight = (this.renderer.lineHeight); // TODO - Make this configurable
 
         // Screen Manager
-        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         screenManager.setPadding(4);
         int xAxis = screenManager.calculateXAxis(Xcords, Scale, BoxWidth);
         int yAxis = screenManager.calculateYAxis(lineHeight, hudInfo.size(), Ycords, Scale);
@@ -157,10 +154,10 @@ public class HUD {
         for (String line : hudInfo) {
             int offset = 0;
             if (config.uiConfig.textAlignment == TextAlignment.Right) {
-                int lineLength = this.renderer.getWidth(line);
+                int lineLength = this.renderer.width(line);
                 offset = (BoxWidth - lineLength);
             } else if (config.uiConfig.textAlignment == TextAlignment.Center) {
-                int lineLength = this.renderer.getWidth(line);
+                int lineLength = this.renderer.width(line);
                 offset = (BoxWidth - lineLength) / 2;
             }
             // Colour Check
@@ -171,31 +168,31 @@ public class HUD {
             // Render the line
             if (config.uiConfig.textBackground) {
                 // Draw Background
-                context.fill(xAxis + offset - 1, yAxis - 1, xAxis + offset + this.renderer.getWidth(line), yAxis + lineHeight - 1, 0x80000000);
+                context.fill(xAxis + offset - 1, yAxis - 1, xAxis + offset + this.renderer.width(line), yAxis + lineHeight - 1, 0x80000000);
             }
-            context.drawTextWithShadow(this.renderer, line, xAxis + offset, yAxis, colour);
+            context.drawString(this.renderer, line, xAxis + offset, yAxis, colour, true);
             yAxis += lineHeight;
         }
 
         screenManager.resetScale(context);
     }
 
-    private void drawTime(DrawContext context, String systemTime) {
+    private void drawTime(GuiGraphics context, String systemTime) {
         // Screen Manager
-        ScreenManager timeScreenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager timeScreenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         timeScreenManager.setPadding(2);
         float timeScale = (float) config.statusElements.systemTime.textScale / 100;
-        int xAxisTime = timeScreenManager.calculateXAxis(100, timeScale, this.renderer.getWidth(systemTime));
-        int yAxisTime = timeScreenManager.calculateYAxis(this.renderer.fontHeight, 1, 100, timeScale);
+        int xAxisTime = timeScreenManager.calculateXAxis(100, timeScale, this.renderer.width(systemTime));
+        int yAxisTime = timeScreenManager.calculateYAxis(this.renderer.lineHeight, 1, 100, timeScale);
         timeScreenManager.setScale(context, timeScale);
 
         if (config.statusElements.systemTime.textBackground) {
             // Draw Background
-            context.fill(xAxisTime - 1, yAxisTime - 1, xAxisTime + this.renderer.getWidth(systemTime), yAxisTime + this.renderer.fontHeight - 1, 0x80000000);
+            context.fill(xAxisTime - 1, yAxisTime - 1, xAxisTime + this.renderer.width(systemTime), yAxisTime + this.renderer.lineHeight - 1, 0x80000000);
         }
 
         // Draw System Time on Bottom Right of Screen
-        context.drawTextWithShadow(this.renderer, systemTime, xAxisTime, yAxisTime, config.uiConfig.textColor);
+        context.drawString(this.renderer, systemTime, xAxisTime, yAxisTime, config.uiConfig.textColor, true);
 
         timeScreenManager.resetScale(context);
     }

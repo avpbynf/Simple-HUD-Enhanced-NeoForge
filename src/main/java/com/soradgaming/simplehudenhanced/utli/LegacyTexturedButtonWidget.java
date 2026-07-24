@@ -1,22 +1,22 @@
 package com.soradgaming.simplehudenhanced.utli;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
-public class LegacyTexturedButtonWidget extends TexturedButtonWidget {
+public class LegacyTexturedButtonWidget extends ImageButton {
     private final int u;
     private final int v;
     private final int hoveredVOffset;
 
-    private final Identifier texture;
+    private final ResourceLocation texture;
 
     private final int textureWidth;
     private final int textureHeight;
 
-    public LegacyTexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, Identifier texture, int textureWidth, int textureHeight, ButtonWidget.PressAction pressAction, Text message) {
+    public LegacyTexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, Button.OnPress pressAction, Component message) {
         super(x, y, width, height, null, pressAction, message);
 
         this.u = u;
@@ -30,15 +30,15 @@ public class LegacyTexturedButtonWidget extends TexturedButtonWidget {
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int v = this.v;
 
-        if (!this.isNarratable()) {
+        if (!this.isActive()) {
             v += this.hoveredVOffset * 2;
-        } else if (this.isSelected()) {
+        } else if (this.isHoveredOrFocused()) {
             v += this.hoveredVOffset;
         }
 
-        context.drawTexture(this.texture, this.getX(), this.getY(), this.u, v, this.width, this.height, this.textureWidth, this.textureHeight);
+        context.blit(this.texture, this.getX(), this.getY(), this.u, v, this.width, this.height, this.textureWidth, this.textureHeight);
     }
 }

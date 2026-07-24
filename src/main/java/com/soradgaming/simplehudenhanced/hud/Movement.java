@@ -3,25 +3,25 @@ package com.soradgaming.simplehudenhanced.hud;
 import com.soradgaming.simplehudenhanced.cache.MovementCache;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import com.mojang.blaze3d.platform.Lighting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 
 public class Movement {
-    private final MinecraftClient client;
-    private final TextRenderer renderer;
+    private final Minecraft client;
+    private final Font renderer;
     private final SimpleHudEnhancedConfig config;
-    private final DrawContext context;
+    private final GuiGraphics context;
     private final MovementCache movementCache;
 
-    public Movement(DrawContext context, SimpleHudEnhancedConfig config, MovementCache movementCache) {
-        this.client = MinecraftClient.getInstance();
-        this.renderer = client.textRenderer;
+    public Movement(GuiGraphics context, SimpleHudEnhancedConfig config, MovementCache movementCache) {
+        this.client = Minecraft.getInstance();
+        this.renderer = client.font;
         this.config = config;
         this.context = context;
         this.movementCache = movementCache;
@@ -40,37 +40,37 @@ public class Movement {
     }
 
     // Draw the movement status on the screen
-    private void draw(DrawContext context, String textKey) {
+    private void draw(GuiGraphics context, String textKey) {
         final String text = Utilities.translatable(textKey).getString();
         float Scale = (float) config.movementStatus.textScale / 100;
 
         // Screen Manager
-        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         screenManager.setPadding(4);
-        int xAxis = screenManager.calculateXAxis(config.movementStatus.movementStatusLocationX, Scale, this.renderer.getWidth(text));
-        int yAxis = screenManager.calculateYAxis(this.renderer.fontHeight, 1, config.movementStatus.movementStatusLocationY, Scale);
+        int xAxis = screenManager.calculateXAxis(config.movementStatus.movementStatusLocationX, Scale, this.renderer.width(text));
+        int yAxis = screenManager.calculateYAxis(this.renderer.lineHeight, 1, config.movementStatus.movementStatusLocationY, Scale);
         screenManager.setScale(context, Scale);
 
         // Draw Info
-        context.drawTextWithShadow(this.renderer, text, xAxis, yAxis, config.uiConfig.textColor);
+        context.drawString(this.renderer, text, xAxis, yAxis, config.uiConfig.textColor, true);
 
         screenManager.resetScale(context);
     }
 
     // Draw the Paper Doll
-    public void drawPaperDoll(DrawContext context) {
+    public void drawPaperDoll(GuiGraphics context) {
         if (!config.paperDoll.togglePaperDoll) {
             return;
         }
 
         // Get Player Entity
-        PlayerEntity entity = this.client.player;
+        Player entity = this.client.player;
         if (entity == null) {
             return;
         }
 
         // Config
-        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         float scale = (float) config.paperDoll.textScale / 100;
         float size = 20 * scale;
 
@@ -83,64 +83,64 @@ public class Movement {
         drawEntity(context, xAxis, yAxis, size, entity);
     }
 
-    // InventoryScreen.java
-    private void drawEntity(DrawContext context, int xAxis, int yAxis, float size, LivingEntity entity) {
+    // InventoryScreen.renderEntityInInventory (1.21.1 pipeline)
+    private void drawEntity(GuiGraphics context, int xAxis, int yAxis, float size, LivingEntity entity) {
         // Setup Matrix
-        context.getMatrices().push();
-        context.getMatrices().translate(xAxis, yAxis, 250.0);
-        context.getMatrices().scale(size, size, -size);
+        context.pose().pushPose();
+        context.pose().translate(xAxis, yAxis, 250.0);
+        context.pose().scale(size, size, -size);
         Quaternionf quaternionZ = new Quaternionf().rotateZ(180.0F * 0.017453292F);
         Quaternionf quaternionX = new Quaternionf().rotateX(15.0F * 0.017453292F);
         quaternionZ.mul(quaternionX);
-        context.getMatrices().multiply(quaternionZ);
+        context.pose().mulPose(quaternionZ);
 
         // Setup Environment
-        DiffuseLighting.method_34742();
-        EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
+        Lighting.setupForEntityInInventory();
+        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 
         // Save Rotation
-        float xRot = entity.getPitch();
-        float yBodyRot = entity.bodyYaw;
-        float yHeadRot = entity.headYaw;
-        float xRotO = entity.prevPitch;
-        float yBodyRotO = entity.prevBodyYaw;
-        float yHeadRotO = entity.prevHeadYaw;
+        float xRot = entity.getXRot();
+        float yBodyRot = entity.yBodyRot;
+        float yHeadRot = entity.yHeadRot;
+        float xRotO = entity.xRotO;
+        float yBodyRotO = entity.yBodyRotO;
+        float yHeadRotO = entity.yHeadRotO;
 
         // Modify Rotation
         applyEntityRotations(entity);
 
         // Disable Shadows
-        entityRenderDispatcher.setRenderShadows(false);
+        entityRenderDispatcher.setRenderShadow(false);
 
         // Render Entity
         float xOffset = 0;
-        float yOffset = (entity.getHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * -0.5F;
+        float yOffset = (entity.getBbHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * -0.5F;
 
-        entityRenderDispatcher.render(entity, xOffset, yOffset, 0.0, 0.0F, 1.0F, this.context.getMatrices(), context.getVertexConsumers(), 15728880);
-        context.draw();
+        entityRenderDispatcher.render(entity, xOffset, yOffset, 0.0, 0.0F, 1.0F, this.context.pose(), context.bufferSource(), 15728880);
+        context.flush();
 
         // Restore Rotation
-        entity.setPitch(xRot);
-        entity.bodyYaw = yBodyRot;
-        entity.headYaw = yHeadRot;
-        entity.prevPitch = xRotO;
-        entity.prevBodyYaw = yBodyRotO;
-        entity.prevHeadYaw = yHeadRotO;
+        entity.setXRot(xRot);
+        entity.yBodyRot = yBodyRot;
+        entity.yHeadRot = yHeadRot;
+        entity.xRotO = xRotO;
+        entity.yBodyRotO = yBodyRotO;
+        entity.yHeadRotO = yHeadRotO;
 
         // Reset Environment
-        entityRenderDispatcher.setRenderShadows(true);
-        context.getMatrices().pop();
-        DiffuseLighting.enableGuiDepthLighting();
+        entityRenderDispatcher.setRenderShadow(true);
+        context.pose().popPose();
+        Lighting.setupFor3DItems();
     }
 
     private void applyEntityRotations(LivingEntity entity) {
         // TODO Config
         if (this.config.paperDoll.paperDollLocationY >= 50) {
-            entity.setPitch(-7.5F);
-            entity.prevPitch = -7.5F;
+            entity.setXRot(-7.5F);
+            entity.xRotO = -7.5F;
         } else {
-            entity.setPitch(7.5F);
-            entity.prevPitch = 7.5F;
+            entity.setXRot(7.5F);
+            entity.xRotO = 7.5F;
         }
 
         float defaultRotationYaw = 180.0F;
@@ -153,8 +153,8 @@ public class Movement {
         float yRotOffset = 0;
         float yRotOffsetO = 0;
 
-        entity.bodyYaw = entity.prevBodyYaw = defaultRotationYaw;
-        entity.prevHeadYaw = defaultRotationYaw + yRotOffsetO;
-        entity.headYaw = defaultRotationYaw + yRotOffset;
+        entity.yBodyRot = entity.yBodyRotO = defaultRotationYaw;
+        entity.yHeadRotO = defaultRotationYaw + yRotOffsetO;
+        entity.yHeadRot = defaultRotationYaw + yRotOffset;
     }
 }

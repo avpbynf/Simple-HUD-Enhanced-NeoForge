@@ -1,6 +1,6 @@
 package com.soradgaming.simplehudenhanced.hud;
 
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphics;
 
 public class ScreenManager {
     private final int screenWidth;
@@ -44,28 +44,28 @@ public class ScreenManager {
         }
     }
 
-    public void setScale(DrawContext context, float scale) {
+    public void setScale(GuiGraphics context, float scale) {
         // Change Matrix Stack to draw on the screen
-        context.getMatrices().push();
-        context.getMatrices().scale(scale, scale, scale);
+        context.pose().pushPose();
+        context.pose().scale(scale, scale, scale);
     }
 
-    public void resetScale(DrawContext context) {
+    public void resetScale(GuiGraphics context) {
         // Change Matrix Stack back to normal
-        context.getMatrices().pop();
+        context.pose().popPose();
     }
 
     private float lastZ = 0;
 
-    public void zSet(DrawContext context, float z) {
+    public void zSet(GuiGraphics context, float z) {
         // Change Matrix Stack to draw on the screen
         lastZ = z;
-        context.getMatrices().translate(0.0D, 0.0D, z);
+        context.pose().translate(0.0D, 0.0D, z);
     }
 
-    public void zRevert(DrawContext context) {
+    public void zRevert(GuiGraphics context) {
         // Change Matrix Stack back to normal
-        context.getMatrices().translate(0.0D, 0.0D, -lastZ);
+        context.pose().translate(0.0D, 0.0D, -lastZ);
     }
 
     // xAxis & yAxis Setters and Getters
@@ -97,4 +97,3 @@ public class ScreenManager {
         this.sScale = scale;
     }
 }
-

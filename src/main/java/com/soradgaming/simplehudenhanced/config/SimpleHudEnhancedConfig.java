@@ -4,7 +4,7 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import com.soradgaming.simplehudenhanced.utli.Colours;
-import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.world.effect.MobEffectInstance;
 
 import java.util.function.ToIntBiFunction;
 
@@ -85,11 +85,11 @@ public class SimpleHudEnhancedConfig implements ConfigData {
         @ConfigEntry.ColorPicker(allowAlpha = true)
         public int neutralForegroundColor = beneficialForegroundColor;
     }
-    public int getColor(StatusEffectInstance effect) {
+    public int getColor(MobEffectInstance effect) {
         // Function for combining two colors (used for background color)
         ToIntBiFunction<Integer, Integer> convert = Integer::sum;
         if (colorMode == ColorModeSelector.Custom) {
-            switch (effect.getEffectType().value().getCategory()) {
+            switch (effect.getEffect().value().getCategory()) {
                 case BENEFICIAL -> {
                     return effectsStatus.beneficialForegroundColor;
                 }
@@ -101,10 +101,10 @@ public class SimpleHudEnhancedConfig implements ConfigData {
                 }
             }
         } else if (colorMode == ColorModeSelector.Category) {
-            return convert.applyAsInt(effect.getEffectType().value().getCategory().getFormatting().getColorValue(), 0xff000000);
+            return convert.applyAsInt(effect.getEffect().value().getCategory().getTooltipFormatting().getColor(), 0xff000000);
         }
         // If mode == ColorModeSelector.EFFECT_COLOR or mode == null (default)
-        return convert.applyAsInt(effect.getEffectType().value().getColor(), 0xff000000);
+        return convert.applyAsInt(effect.getEffect().value().getColor(), 0xff000000);
     }
 
     public static class EquipmentStatus {
