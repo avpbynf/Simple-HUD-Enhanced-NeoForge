@@ -1,8 +1,8 @@
 package com.soradgaming.simplehudenhanced.utli;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import java.util.Arrays;
 
 public class TpsTracker {
@@ -15,7 +15,7 @@ public class TpsTracker {
     private long timeGameJoined;
 
     public void onPacketReceive(Packet<?> packet) {
-        if (packet instanceof WorldTimeUpdateS2CPacket) {
+        if (packet instanceof ClientboundSetTimePacket) {
             long now = System.currentTimeMillis();
             float timeElapsed = (float) (now - timeLastTimeUpdate) / 1000.0F;
             tickRates[nextIndex] = clamp(20.0f / timeElapsed);
@@ -31,7 +31,7 @@ public class TpsTracker {
     }
 
     public float getTickRate() {
-        MinecraftClient minecraft = MinecraftClient.getInstance();
+        Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return 0;
         if (System.currentTimeMillis() - timeGameJoined < 4000) return 20;
 
