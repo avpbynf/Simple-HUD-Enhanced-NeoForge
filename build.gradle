@@ -1,107 +1,86 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}"
-    id 'maven-publish'
+    id 'java'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.142'
 }
 
-version = project.mod_version
-group = project.maven_group
+version = mod_version
+group = maven_group
+
+base {
+    archivesName = archives_base_name
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
 
 repositories {
-    // This is required for the Fabric Maven
+    // Cloth Config
     maven {
-        name = "TerraformersMC"
-        url = "https://maven.terraformersmc.com/"
+        name = "Cloth Config"
+        url = "https://maven.shedaniel.me/"
     }
-    // This is required for the Cloth Config dependency
-    maven { url "https://maven.shedaniel.me/" }
-    // This is required for the Trinkets dependency
-    maven {
-        name = "Ladysnake Libs"
-        url = 'https://maven.ladysnake.org/releases'
+    mavenCentral()
+}
+
+neoForge {
+    version = neo_version
+
+    runs {
+        client {
+            client()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
 dependencies {
-    // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // Cloth Config
-    implementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
-    include "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
-
-    // Mod Menu
-    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-
-    // Trinkets
-    //implementation "dev.emi:trinkets:${project.trinkets_version}"
-    implementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cardinal_components_api_version}"
-}
-
-processResources {
-    inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.loader_version
-    filteringCharset "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "minecraft_support_version_key": project.minecraft_support_version_key,
-                "loader_version": project.loader_version,
-                "modmenu_version": project.modmenu_version,
-                "fabric_version": project.fabric_version,
-                "trinkets_version": project.trinkets_version,
-                "cardinal_components_api_version": project.cardinal_components_api_version
+    // Cloth Config for NeoForge (bundles AutoConfig). Compile against it...
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
+    // ...and embed it in the produced jar (jar-in-jar), like the Fabric build did with `include`.
+    jarJar("me.shedaniel.cloth:cloth-config-neoforge") {
+        version {
+            strictly "[${cloth_config_version},)"
+            prefer "${cloth_config_version}"
+        }
     }
 }
+
+// Generate the mod metadata (neoforge.mods.toml) from a template, interpolating gradle properties.
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            cloth_config_version   : cloth_config_version,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
 
 def targetJavaVersion = 25
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
     it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release = targetJavaVersion
-    }
-}
-
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    base.archivesName.set(project.archives_base_name)
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
+    it.options.release = targetJavaVersion
 }
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archives_base_name}" }
-    }
-}
-
-// configure the maven publication
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+        rename { "${it}_${archives_base_name}" }
     }
 }
