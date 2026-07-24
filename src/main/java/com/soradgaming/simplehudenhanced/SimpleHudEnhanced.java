@@ -1,33 +1,28 @@
 package com.soradgaming.simplehudenhanced;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
+import com.soradgaming.simplehudenhanced.client.SimpleHudEnhancedClient;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
 
-public class SimpleHudEnhanced implements ModInitializer {
+@Mod(value = "simplehudenhanced", dist = Dist.CLIENT)
+public class SimpleHudEnhanced {
     public static boolean isModMenuInstalled() {
-        return FabricLoader.getInstance().isModLoaded("modmenu");
+        // ModMenu is a Fabric-only mod; on NeoForge this is always false, which is what we want:
+        // the pause-menu config button (ConfigButton mixin) is injected when it is absent.
+        return ModList.get().isLoaded("modmenu");
     }
+
     public static boolean isTrinketsInstalled() {
-        return FabricLoader.getInstance().isModLoaded("trinkets");
+        // Trinkets is a Fabric-only mod; on NeoForge this is always false and the vanilla
+        // inventory path is used in TrinketAccessor.
+        return ModList.get().isLoaded("trinkets");
     }
 
-    @Override
-    public void onInitialize() {
-        // Check if Trinket mod is installed
-        if (isTrinketsInstalled()) {
-            System.out.println("Trinket mod is installed! Adding compatibility features...");
-        } else {
-            System.out.println("Trinket mod is not installed. Skipping compatibility features...");
-        }
-
-        // Check if ModMenu is installed
-        if (isModMenuInstalled()) {
-            System.out.println("ModMenu is installed! Adding compatibility features...");
-        } else {
-            System.out.println("ModMenu is not installed. Skipping compatibility features...");
-            System.out.println("Injecting Custom Config Button...");
-        }
-
-        System.out.println("Simple Hud Enhanced Mod started.");
+    public SimpleHudEnhanced(IEventBus modEventBus, ModContainer modContainer) {
+        // Client-only mod (see @Mod dist): wire up all client initialisation.
+        SimpleHudEnhancedClient.init(modEventBus, modContainer);
     }
 }
