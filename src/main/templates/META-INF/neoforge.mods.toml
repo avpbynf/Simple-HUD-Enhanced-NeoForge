@@ -1,0 +1,40 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="${mod_license}"
+issueTrackerURL="https://github.com/soradgaming/Simple-HUD-Enhanced/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="SoRadGaming"
+description='''
+A Simple Mod that enhances the game's HUD by introducing customizable elements and features to display information.
+'''
+logoFile="assets/simplehudenhanced/icon.png"
+
+# Mixins
+[[mixins]]
+config="simplehudenhanced.mixins.json"
+
+# Dependencies
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="cloth_config"
+    type="required"
+    versionRange="[${cloth_config_version},)"
+    ordering="AFTER"
+    side="CLIENT"
