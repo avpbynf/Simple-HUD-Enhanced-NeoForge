@@ -33,7 +33,6 @@ public class SimpleHudEnhancedClient {
     private ConfigHolder<SimpleHudEnhancedConfig> configHolder;
     private HUD hud;
     private KeyMapping toggleHudKeybinding;
-    private boolean previousDebugHudState = false;
     private boolean initialised = false;
 
     /**
@@ -85,11 +84,17 @@ public class SimpleHudEnhancedClient {
 
     private void registerGuiLayers(RegisterGuiLayersEvent event) {
         // Attach the custom HUD just below the vanilla title/subtitle layer, mirroring the Fabric
-        // build's InGameHud.render HEAD injection ordering. Registered layers are automatically
-        // hidden when the HUD is hidden with F1.
+        // build's InGameHud.render HEAD injection ordering. Modded layers registered through this
+        // event are inserted raw: unlike vanilla layers they are NOT wrapped in the hideGui guard,
+        // so F1 (hide GUI) and F3 (debug overlay) are checked explicitly here. This reproduces the
+        // Fabric GameRender mixin, which skipped drawHud while the GUI was hidden or F3 was open.
         event.registerBelow(VanillaGuiLayers.TITLE,
                 ResourceLocation.fromNamespaceAndPath("simplehudenhanced", "hud"),
                 (graphics, deltaTracker) -> {
+                    Minecraft client = Minecraft.getInstance();
+                    if (client.options.hideGui || client.getDebugOverlay().showDebugScreen()) {
+                        return;
+                    }
                     HUD instance = HUD.getInstance();
                     if (instance != null) {
                         instance.drawHud(graphics);
@@ -117,18 +122,6 @@ public class SimpleHudEnhancedClient {
         }
 
         SimpleHudEnhancedConfig config = this.configHolder.getConfig();
-
-        // Detect changes in the F3 debug overlay state and hide the HUD while it is shown.
-        boolean currentDebugHudState = client.getDebugOverlay().showDebugScreen();
-        if (currentDebugHudState != previousDebugHudState) {
-            if (currentDebugHudState) {
-                config.uiConfig.toggleSimpleHUDEnhanced = false; // Disable HUD when debug HUD is shown
-            } else if (!config.uiConfig.toggleSimpleHUDEnhanced) {
-                config.uiConfig.toggleSimpleHUDEnhanced = true; // Re-enable HUD when debug HUD is hidden
-            }
-            AutoConfig.getConfigHolder(SimpleHudEnhancedConfig.class).save();
-        }
-        previousDebugHudState = currentDebugHudState;
 
         if (toggleHudKeybinding != null && toggleHudKeybinding.consumeClick()) {
             String chatMessage = "key.simplehudenhanced.toggle_hud.chat_message.on";
