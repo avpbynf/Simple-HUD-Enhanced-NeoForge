@@ -1,10 +1,18 @@
-# Simple HUD Enhanced — NeoForge (1.21.1)
+# Simple HUD Enhanced (NeoForge)
 
 **Unofficial NeoForge port** of [Simple HUD Enhanced](https://github.com/SoRadGaming/Simple-HUD-Enhanced) by [SoRadGaming](https://github.com/SoRadGaming).
 
-This branch is a fork of the original Fabric mod, adapted to run on the [NeoForge](https://neoforged.net/) mod loader for Minecraft 1.21.1. All credit for the mod itself — its features, design and assets — goes to SoRadGaming and the upstream contributors. Only the loader-specific plumbing (build system, mod metadata, event hooks) differs from upstream.
+This repository is a fork of the original Fabric mod, adapted to run on the [NeoForge](https://neoforged.net/) mod loader. All credit for the mod itself (its features, design and assets) goes to SoRadGaming and the upstream contributors. Only the loader-specific plumbing (build system, mod metadata, event hooks) differs from upstream.
 
 The original Fabric version is available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/simple-hud-enhanced) and [Modrinth](https://modrinth.com/mod/simple-hud-enhanced).
+
+## Downloads
+
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/simple-hud-enhanced-neoforge)
+- [Modrinth](https://modrinth.com/mod/simple-hud-enhanced-neoforge)
+- [GitHub releases](https://github.com/avpbynf/Simple-HUD-Enhanced-NeoForge/releases)
+
+Supported Minecraft versions: 1.21.1, 1.21.11, 26.1 and 26.2 (one branch each, this branch targets 1.21.1).
 
 ## Description
 A Minecraft mod that enhances the game's Heads-Up Display (HUD) by introducing
@@ -14,13 +22,15 @@ and other settings of these elements, providing a personalized HUD experience
 tailored to individual preferences.
 
 ## Installation
-1. Download the latest version of the mod from the releases page.
-2. Download and install [NeoForge](https://neoforged.net/) for Minecraft 1.21.1.
-3. Place the downloaded mod in the `mods` folder in your Minecraft directory.
-4. Launch the game using the NeoForge profile.
-5. Enjoy!
+The easiest way is through the [CurseForge app](https://www.curseforge.com/download-app) or the [Modrinth app](https://modrinth.com/app): add the mod to a NeoForge profile or modpack and the app takes care of the rest.
 
-Cloth Config is bundled inside the jar — no other dependency is required.
+Manual install:
+1. Download the jar for your Minecraft version from one of the pages above.
+2. Download and install [NeoForge](https://neoforged.net/).
+3. Place the jar in the `mods` folder of your Minecraft directory.
+4. Launch the game using the NeoForge profile.
+
+Cloth Config is bundled inside the jar, no other dependency is required.
 
 ## Differences from the Fabric version
 - No Mod Menu needed: the config screen is reachable from NeoForge's built-in mod
