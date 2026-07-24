@@ -7,7 +7,6 @@
     "LivingEntityMixin"
   ],
   "client": [
-    "ConfigButton",
     "GameRender",
     "GuiMixin",
     "MovementMixin"
