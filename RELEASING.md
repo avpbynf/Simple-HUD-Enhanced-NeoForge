@@ -5,7 +5,7 @@ This fork ports [Simple HUD Enhanced](https://github.com/SoRadGaming/Simple-HUD-
 ## Branches
 
 - `main` — the port for the newest supported Minecraft version (currently 26.2).
-- `<mcver>-neoforge` (e.g. `26.1-neoforge`) — maintenance branches for older Minecraft versions, mirroring upstream's branch-per-game-version layout.
+- `<mcver>-neoforge` (e.g. `26.2-neoforge`, `26.1-neoforge`) — one branch per Minecraft version, mirroring upstream's branch-per-game-version layout. The newest version's branch is kept in sync with `main`; the older ones are maintenance branches.
 
 ## Version numbers
 
