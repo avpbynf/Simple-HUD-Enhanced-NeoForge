@@ -1,6 +1,7 @@
 package com.soradgaming.simplehudenhanced.hud;
 
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
+import com.soradgaming.simplehudenhanced.utli.TpsTracker;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
@@ -285,7 +286,7 @@ public class GameInfo {
         if (!config.statusElements.toggleTPS) {
             return "";
         }
-        return String.format(Utilities.translatable("text.hud.simplehudenhanced.tps").getString() + ": %.2f", this.client.level.tickRateManager().tickrate()); // TODO test
+        return String.format(Utilities.translatable("text.hud.simplehudenhanced.tps").getString() + ": %.2f", TpsTracker.INSTANCE.getTickRate());
     }
 
     public String getServer() {
