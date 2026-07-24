@@ -21,11 +21,13 @@ jobs:
       - name: Build
         run: ./gradlew build
 
-      - name: Publish to CurseForge
+      - name: Publish to CurseForge and Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 1622979
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          modrinth-id: azfQssnt
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           loaders: neoforge
           environment: client
