@@ -29,4 +29,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           loaders: neoforge
           environment: client
+          java: 25
           changelog: ${{ github.event.release.body }}
