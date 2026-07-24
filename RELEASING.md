@@ -11,6 +11,7 @@ This fork ports [Simple HUD Enhanced](https://github.com/SoRadGaming/Simple-HUD-
 
 - The mod version always mirrors the upstream release the port is based on (currently **4.7.5**). A given `X.Y.Z` on NeoForge has the same features as upstream's `X.Y.Z` on Fabric.
 - Port-specific fixes (nothing changed upstream) bump a fourth digit: `4.7.5.1`, `4.7.5.2`, …
+- A new game-version branch's first release ships at the fork's current fix level (its first release may be `4.7.5.1` directly, with no `4.7.5` before it), so equal version numbers mean equal fix content across branches.
 - Never invent a three-digit version upstream hasn't released — those numbers belong to upstream.
 
 ## Tags & releases
