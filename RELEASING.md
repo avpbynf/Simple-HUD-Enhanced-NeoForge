@@ -17,6 +17,7 @@ This fork ports [Simple HUD Enhanced](https://github.com/SoRadGaming/Simple-HUD-
 
 - One tag per release per game version: `v<modversion>+<mcver>` — e.g. `v4.7.5+26.2` on `main`, `v4.7.5+26.1` on `26.1-neoforge`.
 - Publishing a GitHub release for such a tag triggers the publish workflow (`.github/workflows/publish.yml`), which builds the jar and uploads it to CurseForge with the release notes as changelog.
+- When publishing the same mod version for several game versions, publish the oldest game version first and the newest last, so GitHub's "Latest" badge lands on the newest one (or fix it afterwards by setting `make_latest` on the right release).
 
 ## Updating to a new upstream release (e.g. upstream ships 4.7.6)
 
