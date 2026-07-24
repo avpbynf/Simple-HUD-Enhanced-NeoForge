@@ -1,29 +1,46 @@
-## Mod Pages
-[CurseForge](https://www.curseforge.com/minecraft/mc-mods/simple-hud-enhanced)
+# Simple HUD Enhanced — NeoForge (1.21.1)
 
-[Modrinth](https://modrinth.com/mod/simple-hud-enhanced)
+**Unofficial NeoForge port** of [Simple HUD Enhanced](https://github.com/SoRadGaming/Simple-HUD-Enhanced) by [SoRadGaming](https://github.com/SoRadGaming).
+
+This branch is a fork of the original Fabric mod, adapted to run on the [NeoForge](https://neoforged.net/) mod loader for Minecraft 1.21.1. All credit for the mod itself — its features, design and assets — goes to SoRadGaming and the upstream contributors. Only the loader-specific plumbing (build system, mod metadata, event hooks) differs from upstream.
+
+The original Fabric version is available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/simple-hud-enhanced) and [Modrinth](https://modrinth.com/mod/simple-hud-enhanced).
+
 ## Description
-A Minecraft mod that enhances the game's Heads-Up Display (HUD) by introducing 
+A Minecraft mod that enhances the game's Heads-Up Display (HUD) by introducing
 customizable elements and features to display information.
 The mod is designed to be lightweight and easy to use, allows users to adjust the position, visibility,
-and other settings of these elements, providing a personalized HUD experience 
-tailored to individual preferences though the [Mod Menu mod](https://www.curseforge.com/minecraft/mc-mods/modmenu).
+and other settings of these elements, providing a personalized HUD experience
+tailored to individual preferences.
 
 ## Installation
-1. Download the latest version of the mod from the [releases page]()
-2. Download and install the [Fabric Loader](https://fabricmc.net/use/).
-3. Download and install the [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api).
-4. Download and install the [Mod Menu mod](https://www.curseforge.com/minecraft/mc-mods/modmenu).
-5. Place the downloaded mod in the `mods` folder in your Minecraft directory.
-6. Launch the game using the Fabric profile.
-7. Enjoy!
+1. Download the latest version of the mod from the releases page.
+2. Download and install [NeoForge](https://neoforged.net/) for Minecraft 1.21.1.
+3. Place the downloaded mod in the `mods` folder in your Minecraft directory.
+4. Launch the game using the NeoForge profile.
+5. Enjoy!
+
+Cloth Config is bundled inside the jar — no other dependency is required.
+
+## Differences from the Fabric version
+- No Mod Menu needed: the config screen is reachable from NeoForge's built-in mod
+  list (Config button) and from the dedicated button in the pause menu.
+- The Trinkets integration is not included (Trinkets is Fabric-only; the NeoForge
+  analogue would be Curios). The equipment HUD falls back to the vanilla armour,
+  main-hand and off-hand slots.
+- Client-side TPS tracking is preserved: it is estimated from the server's time
+  packets, exactly like the Fabric build, so no server-side mod is required.
 
 ## Code Contributions
-This mod has been built from the ground up to be modular and faster to update, 
+The original mod has been built from the ground up to be modular and faster to update,
 originally as a fork of Simple Utilities Mod by [johnvictorfs](https://github.com/johnvictorfs/simple-utilities-mod).
 
-This mod has also been built with the help of the following mods:
+It has also been built with the help of the following mods:
 - For Status Effect Rings:
 [A5b84](https://github.com/A5b84/status-effect-bars)
 - For TPS Tracking Client Side:
 [mooziii](https://github.com/mooziii/tpshud-fabric)
+
+Issues and suggestions specific to the NeoForge port belong on this repository's
+issue tracker; anything about the mod's features themselves is best reported
+[upstream](https://github.com/SoRadGaming/Simple-HUD-Enhanced/issues).
