@@ -5,11 +5,11 @@ import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.hud.EquipmentInfoStack;
 import com.soradgaming.simplehudenhanced.hud.ScreenManager;
 import com.soradgaming.simplehudenhanced.utli.TrinketAccessor;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class EquipmentCache {
     private List<EquipmentInfoStack> equipmentInfo;
     private int longestString = 0;
     private final SimpleHudEnhancedConfig config;
-    private ClientPlayerEntity player;
+    private Player player;
     // Deadlock prevention
     private boolean getLongestStringDeadlock;
     private int longestStringOLD;
@@ -41,7 +41,7 @@ public class EquipmentCache {
         return instance;
     }
 
-    public void updateCache(ClientPlayerEntity player) {
+    public void updateCache(Player player) {
         createEquipment(player);
         calculateLongestString();
         calculateScreen();
@@ -55,7 +55,7 @@ public class EquipmentCache {
         }
     }
 
-    private void createEquipment(ClientPlayerEntity player) {
+    private void createEquipment(Player player) {
         equipmentInfoOLD = equipmentInfo;
         getEquipmentInfoDeadlock = true;
 
@@ -83,22 +83,22 @@ public class EquipmentCache {
 
         // Check Config for Item Slot Disabled
         if (!config.equipmentStatus.slots.Head) {
-            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getStack(39)));
+            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getItem(39)));
         }
         if (!config.equipmentStatus.slots.Body) {
-            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getStack(38)));
+            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getItem(38)));
         }
         if (!config.equipmentStatus.slots.Legs) {
-            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getStack(37)));
+            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getItem(37)));
         }
         if (!config.equipmentStatus.slots.Boots) {
-            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getStack(36)));
+            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getInventory().getItem(36)));
         }
         if (!config.equipmentStatus.slots.OffHand) {
-            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getOffHandStack()));
+            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getOffhandItem()));
         }
         if (!config.equipmentStatus.slots.MainHand) {
-            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getMainHandStack()));
+            equipmentInfo.removeIf(equipment -> equipment.getItem().equals(this.player.getMainHandItem()));
         }
 
         getEquipmentInfoDeadlock = false;
@@ -117,7 +117,7 @@ public class EquipmentCache {
 
             // Check if item has durability (Tools, Weapons, Armor) or not (Blocks, Food, etc.)
             if (item.getMaxDamage() != 0) {
-                int currentDurability = item.getMaxDamage() - item.getDamage();
+                int currentDurability = item.getMaxDamage() - item.getDamageValue();
 
                 // Draw Durability
                 if (config.equipmentStatus.Durability.showDurabilityAsPercentage)  {
@@ -128,20 +128,21 @@ public class EquipmentCache {
                     index.setText(String.format("%s", currentDurability));
                 }
 
-                if (config.equipmentStatus.Durability.showColour && item.getDamage() != 0) {
-                    index.setColor(item.getItemBarColor());
+                if (config.equipmentStatus.Durability.showColour && item.getDamageValue() != 0) {
+                    index.setColor(item.getBarColor());
                 } else {
                     index.setColor(addAlpha(config.uiConfig.textColor));
                 }
 
             } else {
                 // Draw Count - Update to Check if player is holding 1 or more of the item (including inventory)
-                if (config.equipmentStatus.showCount && this.player.getInventory().count(item.getItem()) > 1) {
+                int totalCount = this.player.getInventory().countItem(item.getItem());
+                if (config.equipmentStatus.showCount && totalCount > 1) {
                     // Check if player is holding all the item
-                    if (this.player.getInventory().count(item.getItem()) == item.getCount()) {
+                    if (totalCount == item.getCount()) {
                         index.setText(String.valueOf(item.getCount()));
                     } else {
-                        index.setText((item.getCount() + " (" + this.player.getInventory().count(item.getItem()) + ")"));
+                        index.setText(item.getCount() + " (" + totalCount + ")");
                     }
                 } else {
                     index.setText("");
@@ -151,17 +152,17 @@ public class EquipmentCache {
     }
 
     private boolean isItemDurabilityDisabled(ItemStack item) {
-        if (item.equals(this.player.getMainHandStack())) {
+        if (item.equals(this.player.getMainHandItem())) {
             return !config.equipmentStatus.Durability.slots.MainHand;
-        } else if (item.equals(this.player.getOffHandStack())) {
+        } else if (item.equals(this.player.getOffhandItem())) {
             return !config.equipmentStatus.Durability.slots.OffHand;
-        } else if (item.equals(this.player.getInventory().getStack(36))) {
+        } else if (item.equals(this.player.getInventory().getItem(36))) {
             return !config.equipmentStatus.Durability.slots.Boots;
-        } else if (item.equals(this.player.getInventory().getStack(37))) {
+        } else if (item.equals(this.player.getInventory().getItem(37))) {
             return !config.equipmentStatus.Durability.slots.Legs;
-        } else if (item.equals(this.player.getInventory().getStack(38))) {
+        } else if (item.equals(this.player.getInventory().getItem(38))) {
             return !config.equipmentStatus.Durability.slots.Body;
-        } else if (item.equals(this.player.getInventory().getStack(39))) {
+        } else if (item.equals(this.player.getInventory().getItem(39))) {
             return !config.equipmentStatus.Durability.slots.Head;
         } else {
             return false;
@@ -190,7 +191,7 @@ public class EquipmentCache {
             String s = index.getText();
             if (s.length() > longestString) {
                 longestString = s.length();
-                BoxWidth = MinecraftClient.getInstance().textRenderer.getWidth(s);
+                BoxWidth = Minecraft.getInstance().font.width(s);
             }
         }
         this.longestString = BoxWidth;
@@ -214,8 +215,8 @@ public class EquipmentCache {
         screenManagerOLD = screenManager;
         screenManagerDeadlock = true;
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        TextRenderer renderer = client.textRenderer;
+        Minecraft client = Minecraft.getInstance();
+        Font renderer = client.font;
 
         // Screen Size Calculations
         int configX = config.equipmentStatus.equipmentStatusLocationX;
@@ -224,14 +225,14 @@ public class EquipmentCache {
         int lineHeight = 16;
 
         // Screen Manager
-        screenManager = new ScreenManager(client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
+        screenManager = new ScreenManager(client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
         screenManager.setPadding(4);
         int xAxis = screenManager.calculateXAxis(configX, Scale, (this.longestString + 16));
         int yAxis = screenManager.calculateYAxis(lineHeight, equipmentInfo.size(), configY, Scale);
         if (config.equipmentStatus.equipmentOrientation == EquipmentOrientation.Horizontal) {
             int total = 0;
             for (EquipmentInfoStack index : equipmentInfo) {
-                int lineLength = renderer.getWidth(index.getText());
+                int lineLength = renderer.width(index.getText());
                 total += lineLength;
             }
             xAxis = screenManager.calculateXAxis(configX, Scale, total + (24 * equipmentInfo.size()) - 4);

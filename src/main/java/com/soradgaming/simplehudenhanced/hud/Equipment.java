@@ -4,23 +4,23 @@ import com.soradgaming.simplehudenhanced.cache.EquipmentCache;
 import com.soradgaming.simplehudenhanced.config.EquipmentAlignment;
 import com.soradgaming.simplehudenhanced.config.EquipmentOrientation;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Colors;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public class Equipment {
-    private final TextRenderer renderer;
+    private final Font renderer;
     private final SimpleHudEnhancedConfig config;
-    private final DrawContext context;
+    private final GuiGraphics graphics;
     private final EquipmentCache cache;
 
-    public Equipment(DrawContext context,TextRenderer textRenderer, SimpleHudEnhancedConfig config, EquipmentCache equipmentCache) {
+    public Equipment(GuiGraphics graphics, Font textRenderer, SimpleHudEnhancedConfig config, EquipmentCache equipmentCache) {
         this.renderer = textRenderer;
         this.config = config;
-        this.context = context;
+        this.graphics = graphics;
         this.cache = equipmentCache;
     }
 
@@ -39,7 +39,7 @@ public class Equipment {
         int configX = config.equipmentStatus.equipmentStatusLocationX;
 
 
-        screenManager.setScale(context, Scale);
+        screenManager.setScale(graphics, Scale);
 
         // Draw All Items on Screen
         boolean isHorizontal = config.equipmentStatus.equipmentOrientation == EquipmentOrientation.Horizontal;
@@ -50,42 +50,42 @@ public class Equipment {
             ItemStack item = index.getItem();
 
             if (isRightAligned) {
-                int lineLength = this.renderer.getWidth(index.getText());
+                int lineLength = this.renderer.width(index.getText());
                 int offset = (BoxWidth - lineLength);
-                this.context.drawTextWithShadow(this.renderer, index.getText(), xAxis + offset + (isHorizontal? (-offset) : (isOnRight ? -4 : 0)), yAxis + 4, index.getColor());
+                this.graphics.drawString(this.renderer, index.getText(), xAxis + offset + (isHorizontal? (-offset) : (isOnRight ? -4 : 0)), yAxis + 4, index.getColor());
                 int x = xAxis + BoxWidth + 4 + (isHorizontal ? (-BoxWidth + lineLength) : (isOnRight ? -4 : 0));
-                this.context.drawItem(item, x, yAxis);
+                this.graphics.renderItem(item, x, yAxis);
                 drawDurabilityBar(x, yAxis, item);
             } else {
-                this.context.drawTextWithShadow(this.renderer, index.getText(), xAxis + 16 + 4 + (isOnRight ? (isHorizontal? 0 : -4) : 0), yAxis + 4, index.getColor());
+                this.graphics.drawString(this.renderer, index.getText(), xAxis + 16 + 4 + (isOnRight ? (isHorizontal? 0 : -4) : 0), yAxis + 4, index.getColor());
                 int x = xAxis + (isOnRight ? (isHorizontal ? 0 : -4) : 0);
-                this.context.drawItem(item, x, yAxis);
+                this.graphics.renderItem(item, x, yAxis);
                 drawDurabilityBar(x, yAxis, item);
             }
             if (isHorizontal) {
-                int lineLength = this.renderer.getWidth(index.getText());
+                int lineLength = this.renderer.width(index.getText());
                 xAxis += lineLength + 4 + 16 + 4;
             } else {
                 yAxis += lineHeight;
             }
         }
 
-        screenManager.resetScale(context);
+        screenManager.resetScale(graphics);
     }
 
     private void drawDurabilityBar(int xAxis, int yAxis, ItemStack item) {
         if (config.equipmentStatus.Durability.showDurabilityAsBar && item.getMaxDamage() != 0) {
             // Check for 100% durability
-            if (item.getDamage() == 0) {
+            if (item.getDamageValue() == 0) {
                 return;
             }
 
-            int i = item.getItemBarStep();
-            int j = item.getItemBarColor();
+            int i = item.getBarWidth();
+            int j = item.getBarColor();
             int k = xAxis + 2;
             int l = yAxis + 13;
-            this.context.fill(k, l, k + 13, l + 2, Colors.BLACK);
-            this.context.fill(k, l, k + i, l + 1, j | Colors.BLACK);
+            this.graphics.fill(k, l, k + 13, l + 2, CommonColors.BLACK);
+            this.graphics.fill(k, l, k + i, l + 1, j | CommonColors.BLACK);
         }
     }
 }

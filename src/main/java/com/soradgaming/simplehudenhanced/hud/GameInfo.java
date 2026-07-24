@@ -1,102 +1,103 @@
 package com.soradgaming.simplehudenhanced.hud;
 
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
-import com.soradgaming.simplehudenhanced.utli.TpsTracker;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class GameInfo {
-    private final MinecraftClient client;
-    private ClientPlayerEntity player;
+    private final Minecraft client;
+    private final Player player;
     private final SimpleHudEnhancedConfig config;
 
-    public GameInfo(MinecraftClient client, SimpleHudEnhancedConfig config) {
+    public GameInfo(Minecraft client, SimpleHudEnhancedConfig config) {
         this.client = client;
         this.config = config;
 
         if (this.client.player != null) {
             this.player = this.client.player;
         } else {
-            Exception e = new Exception("Player is null");
-            e.printStackTrace();
+            this.player = null;
         }
     }
 
     public String getCords() {
-        if (!config.statusElements.coordinates.toggleCoordinates) {
+        if (!config.statusElements.coordinates.toggleCoordinates || this.player == null) {
             return "";
         }
-        return String.format("%d, %d, %d", this.player.getBlockPos().getX(), this.player.getBlockPos().getY(), this.player.getBlockPos().getZ());
+        return String.format("%d, %d, %d", this.player.blockPosition().getX(), this.player.blockPosition().getY(), this.player.blockPosition().getZ());
     }
 
     public String getBiome() {
-        if (!config.statusElements.Biome.toggleBiome) {
+        if (!config.statusElements.Biome.toggleBiome || this.player == null) {
             return "";
         }
 
-        if (this.client.world == null) {return "";}
+        if (this.client.level == null) {
+            return "";
+        }
 
-        return Utilities.getBiome(this.client.world, this.player, config.statusElements.Biome.toggleBiomeLabel);
+        return Utilities.getBiome(this.client.level, this.player, config.statusElements.Biome.toggleBiomeLabel);
     }
 
     public String getDirection() {
-        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleDirection) {
+        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleDirection || this.player == null) {
             return "";
         }
+        String directionKey = this.player.getDirection().getName();
         if (config.statusElements.coordinates.toggleOffset) {
-            return String.format(" (%s", Utilities.translatable("text.direction.simplehudenhanced." + this.player.getHorizontalFacing().asString()).getString());
+            return String.format(" (%s", Utilities.translatable("text.direction.simplehudenhanced." + directionKey).getString());
         } else {
-            return String.format(" (%s)", Utilities.translatable("text.direction.simplehudenhanced." + this.player.getHorizontalFacing().asString()).getString());
+            return String.format(" (%s)", Utilities.translatable("text.direction.simplehudenhanced." + directionKey).getString());
         }
     }
 
     public String getNether() {
-        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleNetherCoordinateConversion) {
+        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleNetherCoordinateConversion || this.player == null) {
             return "";
         }
         String coordsFormat = "X: %.0f, Z: %.0f";
-        if (this.player.getEntityWorld().getRegistryKey().getValue().toString().equals("minecraft:overworld")) {
-            return (Utilities.translatable("text.hud.simplehudenhanced.nether").getString() + ": " + String.format(coordsFormat, this.player.getX() / 8, this.player.getZ() / 8));
-        } else if (this.player.getEntityWorld().getRegistryKey().getValue().toString().equals("minecraft:the_nether")) {
-            return(Utilities.translatable("text.hud.simplehudenhanced.overworld").getString() + ": " + String.format(coordsFormat, this.player.getX() * 8, this.player.getZ() * 8));
+        if (this.player.level().dimension().equals(Level.OVERWORLD)) {
+            return Utilities.translatable("text.hud.simplehudenhanced.nether").getString() + ": " + String.format(coordsFormat, this.player.getX() / 8, this.player.getZ() / 8);
+        } else if (this.player.level().dimension().equals(Level.NETHER)) {
+            return Utilities.translatable("text.hud.simplehudenhanced.overworld").getString() + ": " + String.format(coordsFormat, this.player.getX() * 8, this.player.getZ() * 8);
         }
         return "";
     }
 
     public String getChunkCords() {
-        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleChunkCoordinates) {
+        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleChunkCoordinates || this.player == null) {
             return "";
         }
-        return(Utilities.translatable("text.hud.simplehudenhanced.chunk").getString() + ": " + String.format("%d, %d, %d", this.player.getBlockPos().getX() >> 4, this.player.getBlockPos().getY() >> 4, this.player.getBlockPos().getZ() >> 4));
+        return Utilities.translatable("text.hud.simplehudenhanced.chunk").getString() + ": " + String.format("%d, %d, %d", this.player.blockPosition().getX() >> 4, this.player.blockPosition().getY() >> 4, this.player.blockPosition().getZ() >> 4);
     }
 
     public String getSubChunkCords() {
-        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleSubChunkCoordinates) {
+        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleSubChunkCoordinates || this.player == null) {
             return "";
         }
-        return(Utilities.translatable("text.hud.simplehudenhanced.subchunk").getString() + ": " + String.format("%d, %d, %d", this.player.getBlockPos().getX() & 0xF, this.player.getBlockPos().getY() & 0xF, this.player.getBlockPos().getZ() & 0xF));
+        return Utilities.translatable("text.hud.simplehudenhanced.subchunk").getString() + ": " + String.format("%d, %d, %d", this.player.blockPosition().getX() & 0xF, this.player.blockPosition().getY() & 0xF, this.player.blockPosition().getZ() & 0xF);
     }
 
     public String getOffset() {
-        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleOffset) {
+        if (!config.statusElements.coordinates.toggleCoordinates || !config.statusElements.coordinates.toggleOffset || this.player == null) {
             return "";
         }
-        Direction facing = this.player.getHorizontalFacing();
+        Direction facing = this.player.getDirection();
         String offset = "";
 
-        if (facing.getOffsetX() > 0) {
+        if (facing.getStepX() > 0) {
             offset += "+X";
-        } else if (facing.getOffsetX() < 0) {
+        } else if (facing.getStepX() < 0) {
             offset += "-X";
         }
 
-        if (facing.getOffsetZ() > 0) {
+        if (facing.getStepZ() > 0) {
             offset += "+Z";
-        } else if (facing.getOffsetZ() < 0) {
+        } else if (facing.getStepZ() < 0) {
             offset += "-Z";
         }
 
@@ -122,17 +123,22 @@ public class GameInfo {
             return "";
         }
 
-        if (this.client.world == null) {
+        if (this.client.level == null) {
             return "";
         }
+         // Update stats before getting count
+        String stats = this.player.level().getChunkSource().gatherStats(); // TODO - Test Total
+        String[] parts = stats.split(",");
+        int loaded = this.player.level().getChunkSource().getLoadedChunksCount();
+        String total = parts.length > 1 ? parts[1].trim() : stats;
 
         if (config.statusElements.counters.chunkCount.toggleTotal && config.statusElements.counters.chunkCount.toggleLoaded) {
-            return String.format("C: %s", this.client.world.getChunkManager().getDebugString());
+            return String.format("C: %s", stats);
         } else {
             if (config.statusElements.counters.chunkCount.toggleLoaded) {
-                return String.format("C: %s", this.client.world.getChunkManager().getLoadedChunkCount());
+                return String.format("C: %s", loaded);
             } else if (config.statusElements.counters.chunkCount.toggleTotal) {
-                return String.format("C: %s", this.client.world.getChunkManager().getDebugString().split(",")[0]); // TODO test
+                return String.format("C: %s", total);
             }
         }
 
@@ -144,8 +150,8 @@ public class GameInfo {
         if (!config.statusElements.counters.toggleEntityCount) {
             return "";
         }
-        if (this.client.world != null) {
-            return String.format("E: %d", this.client.world.getRegularEntityCount());
+        if (this.client.level != null) {
+            return String.format("E: %d", this.client.level.getEntityCount());
         }
         return "";
     }
@@ -155,40 +161,54 @@ public class GameInfo {
         if (!config.statusElements.counters.toggleParticleCount) {
             return "";
         }
-        return String.format("P: %s", this.client.particleManager.getDebugString());
+        return String.format("P: %s", this.client.particleEngine.countParticles());
     }
 
     public String getSpeed() {
-        if (!config.statusElements.playerSpeed.togglePlayerSpeed) {
+        if (!config.statusElements.playerSpeed.togglePlayerSpeed || this.player == null) {
             return "";
         }
 
-        Vec3d playerPosVec = this.player.getEntityPos();
-        double travelledX = playerPosVec.x - this.player.lastX;
-        double travelledZ = playerPosVec.z - this.player.lastZ;
-        double currentSpeed = MathHelper.sqrt((float)(travelledX * travelledX + travelledZ * travelledZ));
+        // Use actual position deltas (displacement) between ticks instead of motion vector.
+        // This reflects true displacement (accounts for collisions, friction, etc.).
+        double dx = this.player.getX() - this.player.xOld;
+        double dz = this.player.getZ() - this.player.zOld;
+        double dy = this.player.getY() - this.player.yOld;
+
+        // displacement per tick -> convert to meters per second by dividing by tick time (0.05s)
+        double xzSpeedPerTick = Math.sqrt(dx * dx + dz * dz);
+        double xzSpeedMps = xzSpeedPerTick / 0.05D;
+
+        double currentSpeedMps = xzSpeedMps;
 
         if (config.statusElements.playerSpeed.togglePlayerVerticalSpeed) {
-            double currentVertSpeed = playerPosVec.y - this.player.lastY;
-            currentSpeed = MathHelper.sqrt((float)(currentSpeed * currentSpeed + currentVertSpeed * currentVertSpeed));
+            double ySpeedPerTick = Math.abs(dy);
+            double ySpeedMps = ySpeedPerTick / 0.05D;
+
+            // deadzone to ignore tiny vertical jitter while standing
+            if (ySpeedMps < 0.1D) {
+                ySpeedMps = 0.0D;
+            }
+
+            currentSpeedMps = Math.sqrt(xzSpeedMps * xzSpeedMps + ySpeedMps * ySpeedMps);
         }
 
-        return String.format("%.2f m/s", currentSpeed / 0.05F);
+        return String.format("%.2f m/s", currentSpeedMps);
     }
 
     public String getLightLevel() {
-        if (!config.statusElements.toggleLightLevel) {
+        if (!config.statusElements.toggleLightLevel || this.player == null) {
             return "";
         }
-        return String.format(Utilities.translatable("text.hud.simplehudenhanced.lightlevel").getString() + ": %d", this.player.getEntityWorld().getLightLevel(this.player.getBlockPos()));
+        return String.format(Utilities.translatable("text.hud.simplehudenhanced.lightlevel").getString() + ": %d", this.player.level().getMaxLocalRawBrightness(this.player.blockPosition()));
     }
 
     public String getTime() {
-        if (!config.statusElements.gameTime.toggleGameTime) {
+        if (!config.statusElements.gameTime.toggleGameTime || this.player == null) {
             return "";
         }
 
-        long time = this.player.getEntityWorld().getTimeOfDay();
+        long time = this.player.level().getDayTime();
 
         if (config.statusElements.gameTime.toggleGameTime24Hour) {
             //24-hour format
@@ -231,31 +251,31 @@ public class GameInfo {
             formatter = java.time.format.DateTimeFormatter.ofPattern("H:mm");
         }
 
-        return(time.format(formatter).toUpperCase());
+        return time.format(formatter).toUpperCase();
     }
 
     public String getDay() {
-        if (!config.statusElements.gameTime.toggleGameDayCounter) {
+        if (!config.statusElements.gameTime.toggleGameDayCounter || this.player == null) {
             return "";
         }
-        long time = this.player.getEntityWorld().getTimeOfDay();
+        long time = this.player.level().getDayTime();
         long day = (time / 24000);
         return String.format(Utilities.translatable("text.hud.simplehudenhanced.day").getString() + ": %d", day);
     }
 
     public String getPlayerName() {
-        if (!config.statusElements.togglePlayerName) {
+        if (!config.statusElements.togglePlayerName || this.player == null) {
             return "";
         }
         return String.format(Utilities.translatable("text.hud.simplehudenhanced.player").getString() + ": %s", this.player.getName().getString());
     }
 
     public String getPing() {
-        if (!config.statusElements.togglePing) {
+        if (!config.statusElements.togglePing || this.player == null) {
             return "";
         }
         try {
-            return String.format("%s " + Utilities.translatable("text.hud.simplehudenhanced.ping").getString(), this.client.getNetworkHandler().getPlayerListEntry(this.player.getUuid()).getLatency());
+            return String.format("%s " + Utilities.translatable("text.hud.simplehudenhanced.ping").getString(), this.client.getConnection().getPlayerInfo(this.player.getUUID()).getLatency());
         } catch (NullPointerException e) {
             return "";
         }
@@ -265,7 +285,7 @@ public class GameInfo {
         if (!config.statusElements.toggleTPS) {
             return "";
         }
-        return String.format(Utilities.translatable("text.hud.simplehudenhanced.tps").getString() + ": %.2f", TpsTracker.INSTANCE.getTickRate());
+        return String.format(Utilities.translatable("text.hud.simplehudenhanced.tps").getString() + ": %.2f", this.client.level.tickRateManager().tickrate()); // TODO test
     }
 
     public String getServer() {
@@ -273,7 +293,7 @@ public class GameInfo {
             return "";
         }
         try {
-            return String.format(Utilities.translatable("text.hud.simplehudenhanced.server").getString() + ": %s", this.client.getCurrentServerEntry().name);
+            return String.format(Utilities.translatable("text.hud.simplehudenhanced.server").getString() + ": %s", this.client.getCurrentServer().name);
         } catch (NullPointerException e) {
             return "";
         }
@@ -284,7 +304,7 @@ public class GameInfo {
             return "";
         }
         try {
-            return String.format(Utilities.translatable("text.hud.simplehudenhanced.serveraddress").getString() + ": %s", this.client.getCurrentServerEntry().address);
+            return String.format(Utilities.translatable("text.hud.simplehudenhanced.serveraddress").getString() + ": %s", this.client.getCurrentServer().ip);
         } catch (NullPointerException e) {
             return "";
         }
@@ -292,21 +312,21 @@ public class GameInfo {
 
     public boolean isPlayerSprinting() {
         // Done this way to ensure null safety
-        return this.player.isSprinting();
+        return this.player != null && this.player.isSprinting();
     }
 
     public boolean isPlayerFlying() {
         // Done this way to ensure null safety
-        return this.player.isGliding();
+        return this.player != null && this.player.isFallFlying();
     }
 
     public boolean isPlayerSwimming() {
         // Done this way to ensure null safety
-        return this.player.isSwimming();
+        return this.player != null && this.player.isSwimming();
     }
 
     public boolean isPlayerSneaking() {
         // Done this way to ensure null safety
-        return this.player.isSneaking();
+        return this.player != null && this.player.isCrouching();
     }
 }

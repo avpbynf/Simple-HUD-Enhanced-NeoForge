@@ -3,30 +3,30 @@ package com.soradgaming.simplehudenhanced.hud;
 import com.soradgaming.simplehudenhanced.cache.MovementCache;
 import com.soradgaming.simplehudenhanced.config.SimpleHudEnhancedConfig;
 import com.soradgaming.simplehudenhanced.utli.Utilities;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import static com.soradgaming.simplehudenhanced.utli.Utilities.addAlpha;
 
 public class Movement {
-    private final MinecraftClient client;
-    private final TextRenderer renderer;
+    private final Minecraft client;
+    private final Font renderer;
     private final SimpleHudEnhancedConfig config;
-    private final DrawContext context;
+    private final GuiGraphics context;
     private final MovementCache movementCache;
 
-    public Movement(DrawContext context, SimpleHudEnhancedConfig config, MovementCache movementCache) {
-        this.client = MinecraftClient.getInstance();
-        this.renderer = client.textRenderer;
+    public Movement(GuiGraphics context, SimpleHudEnhancedConfig config, MovementCache movementCache) {
+        this.client = Minecraft.getInstance();
+        this.renderer = client.font;
         this.config = config;
         this.context = context;
         this.movementCache = movementCache;
@@ -45,37 +45,37 @@ public class Movement {
     }
 
     // Draw the movement status on the screen
-    private void draw(DrawContext context, String textKey) {
+    private void draw(GuiGraphics context, String textKey) {
         final String text = Utilities.translatable(textKey).getString();
         float Scale = (float) config.movementStatus.textScale / 100;
 
         // Screen Manager
-        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         screenManager.setPadding(4);
-        int xAxis = screenManager.calculateXAxis(config.movementStatus.movementStatusLocationX, Scale, this.renderer.getWidth(text));
-        int yAxis = screenManager.calculateYAxis(this.renderer.fontHeight, 1, config.movementStatus.movementStatusLocationY, Scale);
+        int xAxis = screenManager.calculateXAxis(config.movementStatus.movementStatusLocationX, Scale, this.renderer.width(text));
+        int yAxis = screenManager.calculateYAxis(this.renderer.lineHeight, 1, config.movementStatus.movementStatusLocationY, Scale);
         screenManager.setScale(context, Scale);
 
         // Draw Info
-        context.drawTextWithShadow(this.renderer, text, xAxis, yAxis, addAlpha(config.uiConfig.textColor));
+        context.drawString(this.renderer, text, xAxis, yAxis, addAlpha(config.uiConfig.textColor));
 
         screenManager.resetScale(context);
     }
 
     // Draw the Paper Doll
-    public void drawPaperDoll(DrawContext context) {
+    public void drawPaperDoll(GuiGraphics context) {
         if (!config.paperDoll.togglePaperDoll) {
             return;
         }
 
         // Get Player Entity
-        PlayerEntity entity = this.client.player;
+        Player entity = this.client.player;
         if (entity == null) {
             return;
         }
 
         // Config
-        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getScaledWidth(), this.client.getWindow().getScaledHeight());
+        ScreenManager screenManager = new ScreenManager(this.client.getWindow().getGuiScaledWidth(), this.client.getWindow().getGuiScaledHeight());
         float scale = (float) config.paperDoll.textScale / 100;
         float size = 20 * scale;
 
@@ -92,52 +92,34 @@ public class Movement {
         drawEntityInternal(context, x1, y1, x2, y2, size, entity);
     }
 
-    // Custom method for rendering the paper doll. FROM InventoryScreen.java
-    private void drawEntityInternal(DrawContext context, int x1, int y1, int x2, int y2, float size, LivingEntity entity) {
+    // Custom method for rendering the paper doll. Adapted from InventoryScreen.
+    private void drawEntityInternal(GuiGraphics context, int x1, int y1, int x2, int y2, float size, LivingEntity entity) {
         // --- Calculate Scissor Area ---
         context.enableScissor(x1, y1, x2, y2);
         Quaternionf quaternionZ = new Quaternionf().rotateZ(180.0F * 0.017453292F);
         Quaternionf quaternionX = new Quaternionf().rotateX(15.0F * 0.017453292F);
         quaternionZ.mul(quaternionX);
 
-        // Scale Fix
-        EntityRenderState entityRenderState = drawEntity(entity);
-
-        // --- Save Entity's Original Rotation State ---
-        // This is crucial so the paper doll rendering doesn't affect the main player model.
-        float originalPitch = entity.getPitch();
-        float originalBodyYaw = entity.bodyYaw;
-        float originalHeadYaw = entity.headYaw;
-        float originalPrevPitch = entity.lastPitch;
-        float originalPrevBodyYaw = entity.lastBodyYaw;
-        float originalPrevHeadYaw = entity.lastHeadYaw;
-
-        // --- Modify Entity's Rotation for Paper Doll Display ---
+        // Build and tweak the render state (the paper doll only mutates the render state,
+        // never the live entity, so no rotation save/restore is required).
+        EntityRenderState entityRenderState = extractRenderState(entity);
         if (entityRenderState instanceof LivingEntityRenderState livingEntityRenderState) {
             applyEntityRotations(livingEntityRenderState);
         }
 
         // --- Calculate Entity Position and Scale ---
-        float yOffset = (entity.getHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * 0.5F;
+        float yOffset = (entity.getBbHeight() + (1.0F - movementCache.getCurrentHeightOffset())) * 0.5F;
         Vector3f vector3f = new Vector3f(0.0F, yOffset, 0.0F);
-        context.addEntity(entityRenderState, size, vector3f, quaternionZ, quaternionX, x1, y1, x2, y2);
+        context.submitEntityRenderState(entityRenderState, size, vector3f, quaternionZ, quaternionX, x1, y1, x2, y2);
 
-
-        // --- Restore Entity's Original Rotation State ---
-        entity.setPitch(originalPitch);
-        entity.bodyYaw = originalBodyYaw;
-        entity.headYaw = originalHeadYaw;
-        entity.lastPitch = originalPrevPitch;
-        entity.lastBodyYaw = originalPrevBodyYaw;
-        entity.lastHeadYaw = originalPrevHeadYaw;
         context.disableScissor();
     }
 
-    private static EntityRenderState drawEntity(LivingEntity entity) {
-        EntityRenderManager entityRenderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
-        EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderManager.getRenderer(entity);
-        EntityRenderState entityRenderState = entityRenderer.getAndUpdateRenderState(entity, 1.0F);
-        entityRenderState.light = 15728880;
+    private static EntityRenderState extractRenderState(LivingEntity entity) {
+        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        EntityRenderer<? super LivingEntity, ?> entityRenderer = entityRenderDispatcher.getRenderer(entity);
+        EntityRenderState entityRenderState = entityRenderer.createRenderState(entity, 1.0F);
+        entityRenderState.lightCoords = 15728880;
         entityRenderState.shadowPieces.clear();
         entityRenderState.outlineColor = 0;
         return entityRenderState;
@@ -146,9 +128,9 @@ public class Movement {
     private void applyEntityRotations(LivingEntityRenderState entity) {
         // TODO Config
         if (this.config.paperDoll.paperDollLocationY >= 50) {
-            entity.pitch = -7.5F;
+            entity.xRot = -7.5F;
         } else {
-            entity.pitch = 7.5F;
+            entity.xRot = 7.5F;
         }
 
         float defaultRotationYaw = 180.0F;
@@ -160,9 +142,7 @@ public class Movement {
 
         float yRotOffset = 0;
 
-        entity.bodyYaw = defaultRotationYaw;
-        entity.relativeHeadYaw = yRotOffset;
-
-
+        entity.bodyRot = defaultRotationYaw;
+        entity.yRot = yRotOffset;
     }
 }
