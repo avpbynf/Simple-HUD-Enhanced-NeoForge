@@ -28,4 +28,5 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           loaders: neoforge
+          environment: client
           changelog: ${{ github.event.release.body }}
