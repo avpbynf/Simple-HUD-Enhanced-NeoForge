@@ -77,9 +77,15 @@ public class SimpleHudEnhancedClient {
     private void registerGuiLayers(RegisterGuiLayersEvent event) {
         // Attach the custom HUD just below the vanilla title/subtitle layer, mirroring the Fabric
         // HudElementRegistry.attachElementBefore(VanillaHudElements.TITLE_AND_SUBTITLE, ...) ordering.
+        // Modded layers registered through this event are inserted raw: unlike the vanilla layers
+        // they are NOT wrapped in the hideGui guard, so F1 (hide HUD) is checked explicitly here.
+        // This matches upstream Fabric, where the element rides the vanilla HUD layer stack F1 hides.
         event.registerBelow(VanillaGuiLayers.TITLE,
                 Identifier.fromNamespaceAndPath("simplehudenhanced", "hud"),
                 (graphics, deltaTracker) -> {
+                    if (Minecraft.getInstance().options.hideGui) {
+                        return;
+                    }
                     if (this.hud == null) {
                         this.hud = HUD.getInstance();
                         // Render the HUD on next tick
