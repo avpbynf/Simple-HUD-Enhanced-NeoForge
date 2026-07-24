@@ -27,6 +27,8 @@ Cloth Config is bundled inside the jar — no other dependency is required.
   list (Config button) and from the dedicated button in the pause menu.
 - The Trinkets integration is not included (Trinkets is Fabric-only and the
   integration was already disabled upstream in recent versions).
+- Opening the F3 debug screen no longer overwrites the HUD toggle in the config
+  (temporary divergence until this is fixed upstream).
 
 ## Code Contributions
 The original mod has been built from the ground up to be modular and faster to update,
